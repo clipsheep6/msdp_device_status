@@ -103,6 +103,7 @@ public:
     static bool GetErrMsg(const CoordinationMsgInfo &msgInfo, std::string &msg);
     static int32_t GetErrCode(const CoordinationMsgInfo &msgInfo);
     static bool IsSameHandle(napi_env env, napi_value handle, napi_ref ref);
+    static int32_t GetNamePropertyInt32(const napi_env& env, const napi_value& object, const std::string& name, int32_t& ret);
 };
 } // namespace DeviceStatus
 } // namespace Msdp

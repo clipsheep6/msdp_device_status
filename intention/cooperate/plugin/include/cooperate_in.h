@@ -59,6 +59,9 @@ private:
         void OnUpdateCooperateFlag(Context &context, const CooperateEvent &event);
         void OnRemoteHotPlug(Context &context, const CooperateEvent &event);
         void OnRemoteInputDevice(Context &context, const CooperateEvent &event);
+        void OnStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnComeBackWithOptions(Context &context, const CooperateEvent &event);
+        void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
 
         CooperateIn &parent_;
         static std::set<int32_t> filterPointerActions_;
@@ -85,6 +88,8 @@ private:
         void OnBoardOffline(Context &context, const CooperateEvent &event);
         void OnSwitchChanged(Context &context, const CooperateEvent &event);
         void OnSoftbusSessionClosed(Context &context, const CooperateEvent &event);
+        void OnRemoteStartWithOptions(Context &context, const CooperateEvent &event);
+        void OnNormalWithOptions(Context &context, const CooperateEvent &event);
 
         CooperateIn &parent_;
         int32_t timerId_ { -1 };

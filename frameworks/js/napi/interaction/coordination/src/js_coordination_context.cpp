@@ -174,6 +174,57 @@ napi_value JsCoordinationContext::ActivateCompatible(napi_env env, napi_callback
     return jsCoordinationMgr->Activate(env, std::string(remoteNetworkId), startDeviceId, isCompatible, argv[2]);
 }
 
+CooperateOptions JsCoordinationContext::GetCooperationsData(napi_env env, CooperateOptions &cooperateOptions, napi_value optionsHandle)
+{
+    int32_t displayX = 0;
+    cooperateOptions.displayX = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayX", displayX);
+    FI_HILOGE("szy___GetCooperationsData____displayX :%{public}d", cooperateOptions.displayX);
+    int32_t displayY = 0;
+    cooperateOptions.displayY = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayY", displayY);
+    FI_HILOGE("szy___GetCooperationsData____displayY :%{public}d", cooperateOptions.displayY);
+    uint32_t displayId = 0;
+    cooperateOptions.displayId = JsUtil::GetNamePropertyInt32(env, optionsHandle, "displayId", displayId);
+    FI_HILOGE("szy___GetCooperationsData____displayId :%{public}d", cooperateOptions.displayId);
+    return cooperateOptions;
+}
+
+napi_value JsCoordinationContext::ActivateCooperateWithOptions(napi_env env, napi_callback_info info)
+{
+    size_t argc = 3;
+    napi_value argv[3] = { nullptr };
+    CHKRP(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr), GET_CB_INFO);
+
+    if (argc < 3) {
+        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Wrong number of parameters");
+        return nullptr;
+    }
+    if (!UtilNapi::TypeOf(env, argv[0], napi_string)) {
+        THROWERR(env, COMMON_PARAMETER_ERROR, "targetNetworkId", "string");
+        return nullptr;
+    }
+    if (!UtilNapi::TypeOf(env, argv[1], napi_number)) {
+        THROWERR(env, COMMON_PARAMETER_ERROR, "inputDeviceId", "number");
+        return nullptr;
+    }
+    char remoteNetworkId[MAX_STRING_LEN] = { 0 };
+    int32_t startDeviceId = 0;
+    size_t length = 0;
+    CHKRP(napi_get_value_string_utf8(env, argv[0], remoteNetworkId, sizeof(remoteNetworkId), &length), GET_VALUE_STRING_UTF8);
+    CHKRP(napi_get_value_int32(env, argv[1], &startDeviceId), GET_VALUE_INT32);
+
+    if (!UtilNapi::TypeOf(env, argv[2], napi_object)) {
+        THROWERR(env, COMMON_PARAMETER_ERROR, "cooperateOptions", "object");
+        return nullptr;
+    }
+
+    CooperateOptions cooperateOptions = GetCooperationsData(env, cooperateOptions, argv[2]);
+    JsCoordinationContext *jsDev = JsCoordinationContext::GetInstance(env);
+    CHKPP(jsDev);
+    std::shared_ptr<JsCoordinationManager> jsCoordinationMgr = jsDev->GetJsCoordinationMgr();
+    CHKPP(jsCoordinationMgr);
+    return jsCoordinationMgr->ActivateCooperateWithOptions(env, remoteNetworkId, startDeviceId, cooperateOptions);
+}
+
 napi_value JsCoordinationContext::Deactivate(napi_env env, napi_callback_info info)
 {
     CALL_INFO_TRACE;
@@ -659,6 +710,7 @@ void JsCoordinationContext::DeclareDeviceCoordinationInterface(napi_env env, nap
         DECLARE_NAPI_STATIC_FUNCTION("unprepare", Unprepare),
         DECLARE_NAPI_STATIC_FUNCTION("unprepareCooperate", UnprepareCooperate),
         DECLARE_NAPI_STATIC_FUNCTION("activate", Activate),
+        DECLARE_NAPI_STATIC_FUNCTION("activateCooperateWithOptions", ActivateCooperateWithOptions),
         DECLARE_NAPI_STATIC_FUNCTION("activateCooperate", ActivateCooperate),
         DECLARE_NAPI_STATIC_FUNCTION("deactivate", Deactivate),
         DECLARE_NAPI_STATIC_FUNCTION("deactivateCooperate", DeactivateCooperate),

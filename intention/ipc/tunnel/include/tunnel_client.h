@@ -40,6 +40,8 @@ public:
     int32_t Start(Intention intention, ParamBase &data, ParamBase &reply) override;
     // Request to stop the service identified by [`intention`].
     int32_t Stop(Intention intention, ParamBase &data, ParamBase &reply) override;
+    // Request to withOptionsStart the service identified by [`intention`].
+    int32_t WithOptionsStart(Intention intention, ParamBase &data, ParamBase &reply) override;
     // Request to add a watch of state of service, with the service identified by
     // [`intention`], the state to watch identified by [`id`], parameters packed in
     // [`data`] parcel.

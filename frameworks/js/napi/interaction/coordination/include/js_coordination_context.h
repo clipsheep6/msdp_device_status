@@ -36,6 +36,7 @@ public:
     static napi_value Unprepare(napi_env env, napi_callback_info info);
     static napi_value UnprepareCooperate(napi_env env, napi_callback_info info);
     static napi_value Activate(napi_env env, napi_callback_info info);
+    static napi_value ActivateCooperateWithOptions(napi_env env, napi_callback_info info);
     static napi_value ActivateCooperate(napi_env env, napi_callback_info info);
     static napi_value Deactivate(napi_env env, napi_callback_info info);
     static napi_value DeactivateCooperate(napi_env env, napi_callback_info info);
@@ -64,6 +65,7 @@ private:
     static void DeclareDeviceCoordinationData(napi_env env, napi_value exports);
     static void DeclareDeviceCooperateData(napi_env env, napi_value exports);
     static napi_value EnumClassConstructor(napi_env env, napi_callback_info info);
+    static CooperateOptions GetCooperationsData(napi_env env, CooperateOptions &cooperateOptions, napi_value optionsHandle);
 
     std::shared_ptr<JsCoordinationManager> mgr_ { nullptr };
     std::mutex mutex_;

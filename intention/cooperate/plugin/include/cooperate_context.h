@@ -91,6 +91,7 @@ public:
     void OnRelayCooperation(const std::string &networkId, const NormalizedCoordinate &cursorPos);
     void OnResetCooperation();
     void CloseDistributedFileConnection(const std::string &remoteNetworkId);
+    void RemoteStartWithOptionsSuccess(const DSoftbusCooperateOptionsFinished &event);
 
 #ifdef ENABLE_PERFORMANCE_CHECK
     void StartTrace(const std::string &name);

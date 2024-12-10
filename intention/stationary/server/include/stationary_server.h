@@ -34,6 +34,7 @@ public:
     int32_t Disable(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
     int32_t Start(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
     int32_t Stop(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
+    int32_t WithOptionsStart(CallingContext &context, MessageParcel &data, MessageParcel &reply) override;
     int32_t AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t RemoveWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t SetParam(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply) override;

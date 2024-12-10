@@ -251,6 +251,20 @@ void Context::RemoteStartSuccess(const DSoftbusStartCooperateFinished &event)
     SetCursorPosition(event.cursorPos);
 }
 
+void Context::RemoteStartWithOptionsSuccess(const DSoftbusCooperateOptionsFinished &event)
+{
+    remoteNetworkId_ = event.originNetworkId;
+    flag_ = event.extra.flag;
+    priv_ = event.extra.priv;
+    FI_HILOGE("szy_Context__RemoteStartWithOptionsSuccess____displayX :%{public}d", event.cooperateOptions.displayX);
+    FI_HILOGE("szy_Context__RemoteStartWithOptionsSuccess____displayY :%{public}d", event.cooperateOptions.displayY);
+    FI_HILOGE("szy_Context__RemoteStartWithOptionsSuccess____displayId :%{public}d", event.cooperateOptions.displayId);
+    env_->GetInput().SetPointerLocation(event.cooperateOptions.displayX, event.cooperateOptions.displayY,
+        event.cooperateOptions.displayId);
+    FI_HILOGI("Set pointer location: %{private}d, %{private}d, %{private}d",
+        event.cooperateOptions.displayX, event.cooperateOptions.displayY, event.cooperateOptions.displayId);
+}
+
 void Context::RelayCooperate(const DSoftbusRelayCooperate &event)
 {
     remoteNetworkId_ = event.targetNetworkId;

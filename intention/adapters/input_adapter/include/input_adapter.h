@@ -47,7 +47,7 @@ public:
     void RemoveFilter(int32_t filterId) override;
 
     int32_t SetPointerVisibility(bool visible, int32_t priority = 0) override;
-    int32_t SetPointerLocation(int32_t x, int32_t y) override;
+    int32_t SetPointerLocation(int32_t x, int32_t y, int32_t displayId = -1) override;
     int32_t EnableInputDevice(bool enable) override;
 
     void SimulateInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) override;

@@ -52,6 +52,12 @@ enum class HotAreaType {
     AREA_NONE = 4
 };
 
+struct CooperateOptions {
+    int32_t displayX;
+    int32_t displayY;
+    int32_t displayId;
+};
+
 inline constexpr uint32_t COORDINATION_DAMPLING_UP { 0x1 };
 inline constexpr uint32_t COORDINATION_DAMPLING_DOWN { COORDINATION_DAMPLING_UP << 0x1 };
 inline constexpr uint32_t COORDINATION_DAMPLING_LEFT { COORDINATION_DAMPLING_DOWN << 0x1 };

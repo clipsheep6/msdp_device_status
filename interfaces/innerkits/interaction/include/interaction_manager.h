@@ -96,6 +96,18 @@ public:
         std::function<void(const std::string&, const CoordinationMsgInfo&)> callback, bool isCompatible = false);
 
     /**
+     * @brief Starts screen hopping for the mouse pointer.
+     * @param s remoteNetworkId Indicates the descriptor of the target input device (network ID) for screen hopping.
+     * @param startDeviceId Indicates the ID of the source input device (device ID handle) for screen hopping.
+     * @param callback Indicates the callback used to receive the result of starting screen hopping.
+     * @param cooperateOptions cooperation options for peer device.
+     * @return Returns <b>0</b> if the operation is successful; returns a non-zero value otherwise.
+     * @since 9
+     */
+    int32_t ActivateCooperateWithOptions(const std::string &remoteNetworkId, int32_t startDeviceId,
+        std::function<void(const std::string&, const CoordinationMsgInfo&)> callback, CooperateOptions &cooperateOptions);
+
+    /**
      * @brief Stops screen hopping for the mouse pointer.
      * @param isUnchained Specifies Whether to disable the cross-device link.
      * The value <b>true</b> means to disable the cross-device link, and <b>false</b> means the opposite.

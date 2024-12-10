@@ -49,6 +49,8 @@ public:
         const CoordinationMsgInfo &msgInfo);
     static void EmitJsDeactivate(sptr<JsUtil::CallbackInfo> cb, const std::string &networkId,
         const CoordinationMsgInfo &msgInfo);
+    static void EmitJsActivateCooperate(sptr<JsUtil::CallbackInfo> cb, const std::string &remoteNetworkId,
+        const CoordinationMsgInfo &msgInfo);
     static void EmitJsGetCrossingSwitchState(sptr<JsUtil::CallbackInfo> cb, bool state);
     void AddListener(napi_env env, const std::string &type, napi_value handle);
     void RemoveListener(napi_env env, const std::string &type, napi_value handle);

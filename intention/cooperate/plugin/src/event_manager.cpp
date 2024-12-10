@@ -109,6 +109,22 @@ void EventManager::StartCooperateFinish(const DSoftbusStartCooperateFinished &ev
     NotifyCooperateMessage(notice);
 }
 
+void EventManager::StartCooperateWithOptinsFinish(const DSoftbusCooperateOptionsFinished &event)
+{
+    std::shared_ptr<EventInfo> eventInfo = calls_[EventType::START];
+    CHKPV(eventInfo);
+    CooperateNotice notice {
+        .pid = eventInfo->pid,
+        .msgId = eventInfo->msgId,
+        .userData = eventInfo->userData,
+        .networkId = eventInfo->networkId,
+        .msg = (event.success ? CoordinationMessage::ACTIVATE_SUCCESS : CoordinationMessage::ACTIVATE_FAIL),
+        .errCode = event.errCode
+    };
+    calls_[EventType::START] = nullptr;
+    NotifyCooperateMessage(notice);
+}
+
 void EventManager::RemoteStart(const DSoftbusStartCooperate &event)
 {
     CALL_INFO_TRACE;
@@ -116,6 +132,21 @@ void EventManager::RemoteStart(const DSoftbusStartCooperate &event)
 }
 
 void EventManager::RemoteStartFinish(const DSoftbusStartCooperateFinished &event)
+{
+    CALL_INFO_TRACE;
+    CoordinationMessage msg { event.success ?
+                              CoordinationMessage::ACTIVATE_SUCCESS :
+                              CoordinationMessage::ACTIVATE_FAIL };
+    OnCooperateMessage(msg, event.networkId);
+}
+
+void EventManager::RemoteStartWithOptions(const DSoftbusCooperateOptions &event)
+{
+    CALL_INFO_TRACE;
+    OnCooperateMessage(CoordinationMessage::ACTIVATE, event.networkId);
+}
+
+void EventManager::RemoteStartWithOptionsFinish(const DSoftbusCooperateOptionsFinished &event)
 {
     CALL_INFO_TRACE;
     CoordinationMessage msg { event.success ?

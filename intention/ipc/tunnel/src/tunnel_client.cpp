@@ -170,6 +170,38 @@ int32_t TunnelClient::Stop(Intention intention, ParamBase &data, ParamBase &repl
     return RET_OK;
 }
 
+int32_t TunnelClient::WithOptionsStart(Intention intention, ParamBase &data, ParamBase &reply)
+{
+    CALL_DEBUG_ENTER;
+    MessageParcel dataParcel;
+    if (!dataParcel.WriteInterfaceToken(IIntention::GetDescriptor())) {
+        FI_HILOGE("WriteInterfaceToken fail");
+        return RET_ERR;
+    }
+    if (!data.Marshalling(dataParcel)) {
+        FI_HILOGE("ParamBase::Marshalling fail");
+        return RET_ERR;
+    }
+    if (Connect() != RET_OK) {
+        FI_HILOGE("Can not connect to IntentionService");
+        return RET_ERR;
+    }
+    MessageParcel replyParcel;
+    {
+        std::lock_guard lock(mutex_);
+        int32_t ret = devicestatusProxy_->WithOptionsStart(intention, dataParcel, replyParcel);
+        if (ret != RET_OK) {
+            FI_HILOGE("proxy::Start fail");
+            return ret;
+        }
+    }
+    if (!reply.Unmarshalling(replyParcel)) {
+        FI_HILOGE("ParamBase::Unmarshalling fail");
+        return RET_ERR;
+    }
+    return RET_OK;
+}
+
 int32_t TunnelClient::AddWatch(Intention intention, uint32_t id, ParamBase &data, ParamBase &reply)
 {
     CALL_DEBUG_ENTER;

@@ -126,6 +126,25 @@ int32_t CooperateServer::Stop(CallingContext &context, MessageParcel &data, Mess
     return cooperate->Stop(context.pid, param.userData, param.isUnchained);
 }
 
+int32_t CooperateServer::WithOptionsStart(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+{
+    CALL_DEBUG_ENTER;
+    if (int32_t ret = CheckPermission(context); ret != RET_OK) {
+        FI_HILOGE("CheckPermission failed, ret:%{public}d", ret);
+        return ret;
+    }
+    StartCooperateParamWithOptions param;
+    if (!param.Unmarshalling(data)) {
+        FI_HILOGE("StartCooperateParam::Unmarshalling fail");
+        return RET_ERR;
+    }
+    CHKPR(context_, RET_ERR);
+    ICooperate* cooperate = context_->GetPluginManager().LoadCooperate();
+    CHKPR(cooperate, RET_ERR);
+    return cooperate->WithOptionsStart(context.pid, param.userData, param.remoteNetworkId,
+        param.startDeviceId, param.options);
+}
+
 int32_t CooperateServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;

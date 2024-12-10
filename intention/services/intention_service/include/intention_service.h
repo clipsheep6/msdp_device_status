@@ -42,6 +42,7 @@ private:
     int32_t Disable(Intention intention, MessageParcel &data, MessageParcel &reply) override;
     int32_t Start(Intention intention, MessageParcel &data, MessageParcel &reply) override;
     int32_t Stop(Intention intention, MessageParcel &data, MessageParcel &reply) override;
+    int32_t WithOptionsStart(Intention intention, MessageParcel &data, MessageParcel &reply) override;
     int32_t Control(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t AddWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;
     int32_t RemoveWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) override;

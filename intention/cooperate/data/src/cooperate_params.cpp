@@ -150,6 +150,36 @@ bool RegisterHotAreaListenerParam::Unmarshalling(MessageParcel &parcel)
         parcel.ReadBool(checkPermission);
 }
 
+StartCooperateParamWithOptions::StartCooperateParamWithOptions(int32_t userData,
+    const std::string &remoteNetworkId,int32_t startDeviceId, const CooperateOptions &options)
+    : remoteNetworkId(remoteNetworkId), userData(userData),
+      startDeviceId(startDeviceId), options(options)
+{}
+
+bool StartCooperateParamWithOptions::Marshalling(MessageParcel &parcel) const
+{
+    return (
+        parcel.WriteString(remoteNetworkId) &&
+        parcel.WriteInt32(startDeviceId) &&
+        parcel.WriteInt32(userData) &&
+        parcel.WriteInt32(options.displayX) &&
+        parcel.WriteInt32(options.displayY) &&
+        parcel.WriteUint64(options.displayId)
+    );
+}
+
+bool StartCooperateParamWithOptions::Unmarshalling(MessageParcel &parcel)
+{
+    return (
+        parcel.ReadString(remoteNetworkId) &&
+        parcel.ReadInt32(startDeviceId) &&
+        parcel.ReadInt32(userData) &&
+        parcel.ReadInt32(options.displayX) &&
+        parcel.ReadInt32(options.displayY) &&
+        parcel.ReadInt32(options.displayId)
+    );
+}
+
 } // namespace DeviceStatus
 } // namespace Msdp
 } // namespace OHOS

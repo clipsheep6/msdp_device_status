@@ -200,6 +200,28 @@ int32_t IntentionManager::ActivateCoordination(const std::string &remoteNetworkI
 #endif // OHOS_BUILD_ENABLE_COORDINATION
 }
 
+int32_t IntentionManager::ActivateCooperateWithOptions(const std::string &remoteNetworkId,
+    int32_t startDeviceId, CooperateMsgInfoCallback callback, const CooperateOptions &options)
+{
+    CALL_INFO_TRACE;
+    FI_HILOGE("szy___IntentionManager____remoteNetworkId :%{public}s", remoteNetworkId.c_str());
+    FI_HILOGE("szy___IntentionManager____startDeviceId :%{public}d", startDeviceId);
+    FI_HILOGE("szy___IntentionManager____displayX :%{public}d", options.displayX);
+    FI_HILOGE("szy___IntentionManager____displayY :%{public}d", options.displayY);
+    FI_HILOGE("szy___IntentionManager____displayId :%{public}d", options.displayId);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    InitClient();
+    return cooperate_.WithOptionsStart(*tunnel_, remoteNetworkId, startDeviceId, callback, options);
+#else
+    FI_HILOGW("Coordination does not support");
+    (void)(remoteNetworkId);
+    (void)(startDeviceId);
+    (void)(callback);
+    (void)(options);
+    return ERROR_UNSUPPORT;
+#endif // OHOS_BUILD_ENABLE_COORDINATION
+}
+
 int32_t IntentionManager::DeactivateCoordination(bool isUnchained,
     CooperateMsgInfoCallback callback, bool isCompatible)
 {

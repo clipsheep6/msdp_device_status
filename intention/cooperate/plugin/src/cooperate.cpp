@@ -200,6 +200,33 @@ int32_t Cooperate::Stop(int32_t pid, int32_t userData, bool isUnchained)
     return RET_OK;
 }
 
+int32_t Cooperate::WithOptionsStart(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
+    int32_t startDeviceId, const CooperateOptions &options)
+{
+    CALL_DEBUG_ENTER;
+#ifdef ENABLE_PERFORMANCE_CHECK
+    std::ostringstream ss;
+    ss << "start_cooperation_with_" << Utility::Anonymize(remoteNetworkId).c_str();
+    context_.StartTrace(ss.str());
+#endif // ENABLE_PERFORMANCE_CHECK
+    StartWithOptionsEvent event {
+        .pid = pid,
+        .userData = userData,
+        .remoteNetworkId = remoteNetworkId,
+        .startDeviceId = startDeviceId,
+        .displayX = options.displayX,
+        .displayY = options.displayY,
+        .displayId = options.displayId,
+        .errCode = std::make_shared<std::promise<int32_t>>(),
+    };
+    auto errCode = event.errCode->get_future();
+    auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::WITH_OPTIONS_START, event));
+    if (ret != Channel<CooperateEvent>::NO_ERROR) {
+        FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+    }
+    return errCode.get();
+}
+
 int32_t Cooperate::GetCooperateState(int32_t pid, int32_t userData, const std::string &networkId)
 {
     CALL_DEBUG_ENTER;

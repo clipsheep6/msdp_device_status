@@ -28,6 +28,7 @@ declare_args() {
   device_status_memmgr_enable = false
   device_status_enable_universal_drag = false
   device_status_device_type = "default"
+  device_status_interaction_with_options = false
 
   # origin variables sets
   if (!is_arkui_x) {
@@ -128,4 +129,6 @@ if (device_status_enable_universal_drag) {
 
 if (device_status_device_type == "pc") {
   device_status_default_defines += [ "OHOS_BUILD_PC_PRODUCT" ]
+if (device_status_interaction_with_options) {
+  device_status_default_defines += [ "OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS" ]
 }

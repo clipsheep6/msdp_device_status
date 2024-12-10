@@ -34,6 +34,8 @@ public:
     napi_value Unprepare(napi_env env, bool isCompatible, napi_value handle = nullptr);
     napi_value Activate(napi_env env, const std::string &remoteNetworkDescriptor,
         int32_t startDeviceId, bool isCompatible, napi_value handle = nullptr);
+    napi_value ActivateCooperateWithOptions(napi_env env, const std::string &remoteNetworkDescriptor,
+        int32_t startDeviceId, CooperateOptions &cooperateOptions);
     napi_value Deactivate(napi_env env, bool isUnchained, bool isCompatible, napi_value handle = nullptr);
     napi_value GetCrossingSwitchState(napi_env env, const std::string &networkId,
         bool isCompatible, napi_value handle = nullptr);

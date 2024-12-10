@@ -132,6 +132,27 @@ int32_t IntentionService::Stop(Intention intention, MessageParcel &data, Message
     return ret;
 }
 
+int32_t IntentionService::WithOptionsStart(Intention intention, MessageParcel &data, MessageParcel &reply)
+{
+    CallingContext context {
+        .intention = intention,
+        .fullTokenId = IPCSkeleton::GetCallingFullTokenID(),
+        .tokenId = IPCSkeleton::GetCallingTokenID(),
+        .uid = IPCSkeleton::GetCallingUid(),
+        .pid = IPCSkeleton::GetCallingPid(),
+    };
+    CHKPR(context_, RET_ERR);
+    int32_t ret = context_->GetDelegateTasks().PostSyncTask([&] {
+        IPlugin *plugin = LoadPlugin(context.intention);
+        CHKPR(plugin, RET_ERR);
+        return plugin->WithOptionsStart(context, data, reply);
+    });
+    if (ret != RET_OK) {
+        FI_HILOGE("Start failed, ret:%{public}d", ret);
+    }
+    return ret;  
+}
+
 int32_t IntentionService::AddWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
     CHKPR(context_, RET_ERR);

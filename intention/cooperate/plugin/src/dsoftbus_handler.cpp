@@ -21,6 +21,9 @@
 #include "device.h"
 #include "devicestatus_define.h"
 #include "utility.h"
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+#include "cooperate_hisysevent.h"
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
 
 #undef LOG_TAG
 #define LOG_TAG "DSoftbusHandler"
@@ -29,6 +32,11 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
+
+namespace {
+const std::string COOPERTATE_BEHAVIOR {"COOPERTATE_BEHAVIOR"};
+const std::string ORG_PKG_NAME {"device_status"};
+}
 constexpr int32_t MAX_INPUT_DEV_NUM { 100 };
 constexpr int32_t INVALID_DEVICE_ID { -1 };
 
@@ -195,6 +203,37 @@ std::string DSoftbusHandler::GetLocalNetworkId()
     return IDSoftbusAdapter::GetLocalNetworkId();
 }
 
+void DSoftbusHandler::ReportSendPacket(BizCooperateStage stageRes, CooperateRadarErrCode errCode,
+    const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_DSOFTBUS);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    ReportAccount(coopertateRadarInfo);
+}
+
+void DSoftbusHandler::ReportAccount(CooperateRadarInfo cooperateRadarInfo)
+{
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+        COOPERTATE_BEHAVIOR,
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "ORG_PKG", ORG_PKG_NAME,
+        "FUNC", cooperateRadarInfo.funcName,
+        "BIZ_SCENE", 1,
+        "BIZ_STATE", cooperateRadarInfo.bizState,
+        "BIZ_STAGE", cooperateRadarInfo.bizStage,
+        "STAGE_RES", cooperateRadarInfo.stageRes,
+        "ERROR_CODE", cooperateRadarInfo.errCode,
+        "HOST_PKG", cooperateRadarInfo.hostName,
+        "LOCAL_NET_ID", cooperateRadarInfo.localNetId,
+        "PEER_NET_ID", cooperateRadarInfo.peerNetId);
+}
+
 void DSoftbusHandler::OnBind(const std::string &networkId)
 {
     FI_HILOGI("Bind to \'%{public}s\'", Utility::Anonymize(networkId).c_str());
@@ -269,6 +308,8 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
         >> event.cursorPos.y >> event.success;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to read data packet");
+        ReportSendPacket(BizCooperateStage::STAGE_DSOFTBUS, CooperateRadarErrCode::FAILED_SEND_PACKET,
+            "StartCooperate", "");
         return;
     }
     packet >> event.extra.priv;

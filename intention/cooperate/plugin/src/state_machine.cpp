@@ -39,6 +39,12 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
 namespace Cooperate {
+    
+namespace {
+const std::string COOPERTATE_BEHAVIOR {"COOPERTATE_BEHAVIOR"};
+const std::string ORG_PKG_NAME {"device_status"};
+}
+
 
 StateMachine::AppStateObserver::AppStateObserver(Channel<CooperateEvent>::Sender sender, int32_t clientPid)
     : sender_(sender), clientPid_(clientPid) {}
@@ -57,6 +63,37 @@ void StateMachine::AppStateObserver::OnProcessDied(const AppExecFwk::ProcessData
         }
         FI_HILOGI("\'%{public}s\' died, report to handler", processData.bundleName.c_str());
     }
+}
+
+void StateMachine::AppStateObserver::ReportCheckSameAccount(BizCooperateStage stageRes,
+    CooperateRadarErrCode errCode, const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_CHECK_SAME_ACCOUNT);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    ReportAccount(coopertateRadarInfo);
+}
+
+void StateMachine::AppStateObserver::ReportAccount(CooperateRadarInfo cooperateRadarInfo)
+{
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+        COOPERTATE_BEHAVIOR,
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "ORG_PKG", ORG_PKG_NAME,
+        "FUNC", cooperateRadarInfo.funcName,
+        "BIZ_SCENE", 1,
+        "BIZ_STATE", cooperateRadarInfo.bizState,
+        "BIZ_STAGE", cooperateRadarInfo.bizStage,
+        "STAGE_RES", cooperateRadarInfo.stageRes,
+        "ERROR_CODE", cooperateRadarInfo.errCode,
+        "HOST_PKG", cooperateRadarInfo.hostName,
+        "LOCAL_NET_ID", cooperateRadarInfo.localNetId,
+        "PEER_NET_ID", cooperateRadarInfo.peerNetId);
 }
 
 void StateMachine::AppStateObserver::UpdateClientPid(int32_t clientPid)
@@ -292,6 +329,8 @@ void StateMachine::StartCooperate(Context &context, const CooperateEvent &event)
     if (!env_->GetDDM().CheckSameAccountToLocal(startEvent.remoteNetworkId)) {
         FI_HILOGE("CheckSameAccountToLocal failed");
         startEvent.errCode->set_value(COMMON_PERMISSION_CHECK_ERROR);
+        ReportCheckSameAccount(BizCooperateStage::STAGE_CHECK_SAME_ACCOUNT,
+            CooperateRadarErrCode::FAILED_CHECK_SAME_ACCOUNT, "StartCooperate", startEvent.remoteNetworkId);
         return;
     }
     UpdateApplicationStateObserver(startEvent.pid);

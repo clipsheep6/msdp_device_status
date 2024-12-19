@@ -74,6 +74,55 @@ struct DragRadarInfo {
     std::string appVersionId;
 };
 
+enum class BizCooperateStage {
+    STAGE_START_COOPERATE = 0,
+    STAGE_SERVER_GET_IPC,
+    STAGE_CHECK_SAME_ACCOUNT,
+    STAGE_PEER_STAGE,
+	STAGE_COOPERATE,
+    STAGE_DSOFTBUS,
+    STAGE_EXPECT_API,
+    STAGE_CONTROL_MANAGER,
+    STAGE_SEND_MANAGER,
+    STAGE_ADD_INPUTEVENTINTERCEPOR,
+    STAGE_STATEMACHINE,
+    STAGE_MOUSE_VISIBLE_HIDDEN,
+    STAGE_SERVER_EVENTMANAGER,
+    STAGE_CLINT_RESULT,
+    STAGE_NOTIFY
+};
+ 
+enum class CooperateRadarErrCode {
+    COOPERATE_SUCCESS = 0,
+    COOPERATE_FAILED = 20900005,
+    FAILED_CHECK_SAME_ACCOUNT,
+	SHARE_OFF,
+    SCENE_NOT_ALLOW_COOPERATE,
+    DSOFE_FAIL,
+    FAILED_UNEXPECTED_INTERFACE,
+    FAILED_SERIALIZE,
+    FAILED_SEND_PACKET,
+    FAILED_INPUTEVENTINTERCEPTOR_ADD,
+    CHANGE_MACHINE,
+    FAILED_POINTER_VISIBLE,
+    FAILED_SAME_ACCOUNT,
+    COOPERATE_ENABLE_OFF,
+    FAILED_INPUTEVENTBUILDER,
+    FAILED_NOTIFY_SUCCESS,
+    FAILED_NOTIFY
+};
+ 
+struct CooperateRadarInfo {
+    std::string funcName;
+    int32_t bizState { -1 };
+    int32_t bizStage { -1 };
+    int32_t stageRes { -1 };
+    int32_t errCode { -1 };
+    std::string hostName;
+    std::string localNetId;
+    std::string peerNetId;
+};
+
 int32_t GetPid();
 const char* GetProgramName();
 int64_t GetMillisTime();

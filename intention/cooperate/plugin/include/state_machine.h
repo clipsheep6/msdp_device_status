@@ -35,7 +35,7 @@ public:
     StateMachine(IContext *env);
     ~StateMachine() = default;
     DISALLOW_COPY_AND_MOVE(StateMachine);
-
+    
     void OnEvent(Context &context, const CooperateEvent &event);
     bool IsCooperateEnable();
 
@@ -46,7 +46,9 @@ private:
         ~AppStateObserver() = default;
         void UpdateClientPid(int32_t clientPid);
         void OnProcessDied(const AppExecFwk::ProcessData &processData) override;
-
+        void ReportCheckSameAccount(BizCooperateStage stageRes, CooperateRadarErrCode errCode,
+            const std::string &funcName, const std::string &packageName);
+        void ReportAccount(struct CooperateRadarInfo cooperateRadarInfo);
     private:
         Channel<CooperateEvent>::Sender sender_;
         int32_t clientPid_;

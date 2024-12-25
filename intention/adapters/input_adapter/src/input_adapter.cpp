@@ -25,6 +25,9 @@
 namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
+namespace {
+constexpr int32_t DEFUALT_COOPERATE_PRIORITY  { 10 };
+} // namespace
 
 int32_t InputAdapter::AddMonitor(std::function<void(std::shared_ptr<MMI::PointerEvent>)> callback)
 {
@@ -118,7 +121,7 @@ void InputAdapter::RemoveFilter(int32_t filterId)
 int32_t InputAdapter::SetPointerVisibility(bool visible, int32_t priority)
 {
     FI_HILOGI("Set pointer visibility, visible:%{public}s", visible ? "true" : "false");
-    return MMI::InputManager::GetInstance()->SetPointerVisible(visible, priority);
+    return MMI::InputManager::GetInstance()->SetPointerVisible(visible, DEFUALT_COOPERATE_PRIORITY);
 }
 
 int32_t InputAdapter::SetPointerLocation(int32_t x, int32_t y)

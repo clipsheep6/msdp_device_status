@@ -167,7 +167,6 @@ if (!is_arkui_x) {
       "${device_status_root_path}/interfaces/innerkits/interaction/include",
       "${device_status_root_path}/intention/prototype/include",
       "${device_status_root_path}/services/interaction/drag/include",
-      "${library_utils_path}/base/include",
       "${plugins_media_path}/media/mock",
       "${file_dfx_hilog_path}/interfaces/native/innerkits/include",
       "${device_status_root_path}/utils/common",
@@ -218,7 +217,10 @@ if (!is_arkui_x) {
       "//third_party/libxml2:static_libxml2",
     ]
 
-    external_deps = [ "cJSON:cjson" ]
+    external_deps = [
+      "cJSON:cjson",
+      "c_utils:utils",
+    ]
 
     subsystem_name = "${device_status_subsystem_name}"
     part_name = "${device_status_part_name}"

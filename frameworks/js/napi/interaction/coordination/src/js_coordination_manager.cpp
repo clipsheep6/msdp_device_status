@@ -79,6 +79,25 @@ napi_value JsCoordinationManager::Activate(napi_env env, const std::string &remo
     return result;
 }
 
+napi_value JsCoordinationManager::ActivateCooperateWithOptions(napi_env env, const std::string &remoteNetworkId,
+    int32_t startDeviceId, CooperateOptions &cooperateOptions)
+{
+    CALL_INFO_TRACE;
+    sptr<JsUtil::CallbackInfo> cb = new (std::nothrow) JsUtil::CallbackInfo();
+    CHKPP(cb);
+    napi_value handle = nullptr;
+    napi_value result = CreateCallbackInfo(env, handle, cb);
+    auto callback = [this, cb](const std::string &remoteNetworkId, const CoordinationMsgInfo &msgInfo) {
+        this->EmitJsActivate(cb, remoteNetworkId, msgInfo);
+    };
+    int32_t errCode = INTERACTION_MGR->ActivateCooperateWithOptions(remoteNetworkId, startDeviceId, callback, cooperateOptions);
+    if (errCode != RET_OK) {
+        UtilNapiError::HandleExecuteResult(env, errCode, "activateCooperateWithOptions", COOPERATE_PERMISSION);
+        RELEASE_CALLBACKINFO(cb->env, cb->ref);
+    }
+    return result;
+}
+
 napi_value JsCoordinationManager::Deactivate(napi_env env,
     bool isUnchained, bool isCompatible, napi_value handle)
 {

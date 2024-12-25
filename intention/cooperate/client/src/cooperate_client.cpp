@@ -154,6 +154,34 @@ int32_t CooperateClient::Start(ITunnelClient &tunnel, const std::string &remoteN
     return RET_OK;
 }
 
+int32_t CooperateClient::WithOptionsStart(ITunnelClient &tunnel, const std::string &remoteNetworkId,
+    int32_t startDeviceId, CooperateMessageCallback callback, const CooperateOptions &options)
+{
+    CALL_DEBUG_ENTER;
+    std::lock_guard<std::mutex> guard(mtx_);
+    CooperateEvent event { callback };
+    auto userData = GenerateRequestID();
+#ifdef ENABLE_PERFORMANCE_CHECK
+    StartTrace(userData);
+#endif // ENABLE_PERFORMANCE_CHECK
+    StartCooperateParamWithOptions param { userData, remoteNetworkId, startDeviceId, options };
+    DefaultReply reply;
+
+    int32_t ret = tunnel.WithOptionsStart(Intention::COOPERATE, param, reply);
+    if (ret != RET_OK) {
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+        CooperateDFX::WriteStart(OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+        FI_HILOGE("Activate cooperate failed");
+        return ret;
+    }
+    devCooperateEvent_.insert_or_assign(param.userData, event);
+#ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+    CooperateDFX::WriteStart(OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR);
+#endif // MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
+    return RET_OK;
+}
+
 int32_t CooperateClient::Stop(ITunnelClient &tunnel,
     bool isUnchained, CooperateMessageCallback callback, bool isCheckPermission)
 {

@@ -29,6 +29,7 @@ namespace {
 inline constexpr std::string_view GET_BOOLEAN { "napi_get_boolean" };
 inline constexpr std::string_view COERCE_TO_BOOL { "napi_coerce_to_bool" };
 inline constexpr std::string_view CREATE_ERROR { "napi_create_error" };
+inline constexpr std::string_view GET_VALUE_INT32 { "napi_get_value_int32" };
 } // namespace
 
 napi_value JsUtil::GetPrepareInfo(sptr<CallbackInfo> cb)
@@ -167,6 +168,25 @@ bool JsUtil::IsSameHandle(napi_env env, napi_value handle, napi_ref ref)
     CHKRF_SCOPE(env, napi_strict_equals(env, handle, tempHandler, &isEqual), STRICT_EQUALS, scope);
     napi_close_handle_scope(env, scope);
     return isEqual;
+}
+
+int32_t JsUtil::GetNamePropertyInt32(const napi_env& env, const napi_value& object,
+    const std::string& name, int32_t& ret)
+{
+    napi_value napiValue = {};
+    CHKRF(napi_get_named_property(env, object, name.c_str(), &napiValue), GET_NAMED_PROPERTY);
+    napi_valuetype tmpType = napi_undefined;
+    if (napi_typeof(env, napiValue, &tmpType) != napi_ok) {
+        FI_HILOGE("Call napi_typeof failed");
+        return false;
+    }
+    if (tmpType != napi_number) {
+        FI_HILOGE("The value is not number");
+        return false;
+    }
+    CHKRF(napi_get_value_int32(env, napiValue, &ret), GET_VALUE_INT32);
+    FI_HILOGE("szy___GetNamePropertyInt32____ret :%{public}d", ret);
+    return ret;
 }
 } // namespace DeviceStatus
 } // namespace Msdp

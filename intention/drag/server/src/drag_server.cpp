@@ -86,6 +86,12 @@ int32_t DragServer::Stop(CallingContext &context, MessageParcel &data, MessagePa
     return env_->GetDragManager().StopDrag(param.dropResult_, GetPackageName(context.tokenId), context.pid);
 }
 
+int32_t DragServer::WithOptionsStart(CallingContext &context, MessageParcel &data, MessageParcel &reply)
+{
+    CALL_DEBUG_ENTER;
+    return RET_ERR;   
+}
+
 int32_t DragServer::AddWatch(CallingContext &context, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;

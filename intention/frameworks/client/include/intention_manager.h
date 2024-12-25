@@ -50,6 +50,8 @@ public:
     int32_t UnprepareCoordination(CooperateMsgInfoCallback callback, bool isCompatible = false);
     int32_t ActivateCoordination(const std::string &remoteNetworkId, int32_t startDeviceId,
         CooperateMsgInfoCallback callback, bool isCompatible = false);
+    int32_t ActivateCooperateWithOptions(const std::string &remoteNetworkId,
+        int32_t startDeviceId, CooperateMsgInfoCallback callback, const CooperateOptions &options);
     int32_t DeactivateCoordination(bool isUnchained, CooperateMsgInfoCallback callback, bool isCompatible = false);
     int32_t GetCoordinationState(const std::string &networkId, std::function<void(bool)> callback,
         bool isCompatible = false);

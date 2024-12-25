@@ -97,6 +97,22 @@ int32_t IntentionProxy::Stop(Intention intention, MessageParcel &data, MessagePa
     return ret;
 }
 
+int32_t IntentionProxy::WithOptionsStart(Intention intention, MessageParcel &data, MessageParcel &reply)
+{
+    CALL_DEBUG_ENTER;
+    sptr<IRemoteObject> remote = Remote();
+    CHKPR(remote, RET_ERR);
+    MessageOption option;
+
+    int32_t ret = remote->SendRequest(
+        PARAMID(CommonAction::With_OPTIONS_START, static_cast<uint32_t>(intention), 0u),
+        data, reply, option);
+    if (ret != RET_OK) {
+        FI_HILOGE("SendRequest is failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t IntentionProxy::AddWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply)
 {
     CALL_DEBUG_ENTER;

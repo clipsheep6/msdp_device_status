@@ -37,6 +37,13 @@ struct StartCooperateData {
 };
 using RemoteStartCooperateData = StartCooperateData;
 
+struct CooperateOptions {
+    int32_t displayX;
+    int32_t displayY;
+    int32_t displayId;
+};
+using NormalizedCooperateOptions = CooperateOptions;
+
 class ICooperateObserver {
 public:
     ICooperateObserver() = default;
@@ -72,6 +79,8 @@ public:
     virtual int32_t Start(int32_t pid, int32_t userData,
         const std::string &remoteNetworkId, int32_t startDeviceId) = 0;
     virtual int32_t Stop(int32_t pid, int32_t userData, bool isUnchained) = 0;
+    virtual int32_t WithOptionsStart(int32_t pid, int32_t userData, const std::string &remoteNetworkId,
+        int32_t startDeviceId, const NormalizedCooperateOptions &CooperateOptions) = 0;
 
     virtual int32_t GetCooperateState(int32_t pid, int32_t userData, const std::string &networkId) = 0;
     virtual int32_t Update(uint32_t mask, uint32_t flag) = 0;

@@ -121,9 +121,9 @@ int32_t InputAdapter::SetPointerVisibility(bool visible, int32_t priority)
     return MMI::InputManager::GetInstance()->SetPointerVisible(visible, priority);
 }
 
-int32_t InputAdapter::SetPointerLocation(int32_t x, int32_t y)
+int32_t InputAdapter::SetPointerLocation(int32_t x, int32_t y, int32_t displayId)
 {
-    return MMI::InputManager::GetInstance()->SetPointerLocation(x, y);
+    return MMI::InputManager::GetInstance()->SetPointerLocation(x, y, displayId);
 }
 
 int32_t InputAdapter::EnableInputDevice(bool enable)

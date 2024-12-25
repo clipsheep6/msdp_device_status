@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "coordination_message.h"
 #include "intention_identity.h"
 
 namespace OHOS {
@@ -107,6 +108,20 @@ struct RegisterHotAreaListenerParam final : public ParamBase {
     bool Unmarshalling(MessageParcel &parcel) override;
     int32_t userData { -1 };
     bool checkPermission { false };
+};
+
+struct StartCooperateParamWithOptions final : public ParamBase {
+    StartCooperateParamWithOptions() = default;
+    StartCooperateParamWithOptions(int32_t userData, const std::string &remoteNetworkId,
+                        int32_t startDeviceId, const CooperateOptions &options);
+    bool Marshalling(MessageParcel &parcel) const override;
+    bool Unmarshalling(MessageParcel &parcel) override;
+
+    std::string remoteNetworkId;
+    int32_t userData { -1 };
+    int32_t startDeviceId { -1 };
+    bool checkPermission { false };
+    CooperateOptions options;
 };
 
 using UnregisterHotAreaListenerParam = RegisterHotAreaListenerParam;

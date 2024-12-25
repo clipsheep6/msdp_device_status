@@ -41,6 +41,8 @@ public:
     virtual int32_t Start(Intention intention, MessageParcel &data, MessageParcel &reply) = 0;
     // Stop the service identified by [`intention`].
     virtual int32_t Stop(Intention intention, MessageParcel &data, MessageParcel &reply) = 0;
+    // Start the service identified by [`intention`] with options.
+    virtual int32_t WithOptionsStart(Intention intention, MessageParcel &data, MessageParcel &reply) = 0;
     // Add a watch of state of service, with the service identified by [`intention`],
     // the state to watch identified by [`id`], parameters packed in [`data`] parcel.
     virtual int32_t AddWatch(Intention intention, uint32_t id, MessageParcel &data, MessageParcel &reply) = 0;

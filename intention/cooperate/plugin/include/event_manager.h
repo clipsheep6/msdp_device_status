@@ -88,6 +88,9 @@ public:
     void OnStatusChanged(const StatusChangeEvent &event);
     void GetCooperateState(const CooperateStateNotice &notice);
     void OnClientDied(const ClientDiedEvent &event);
+    void RemoteStartWithOptions(const DSoftbusCooperateOptions &event);
+    void RemoteStartWithOptionsFinish(const DSoftbusCooperateOptionsFinished &event);
+    void StartCooperateWithOptinsFinish(const DSoftbusCooperateOptionsFinished &event);
 
 private:
     void OnCooperateMessage(CoordinationMessage msg, const std::string &networkId);

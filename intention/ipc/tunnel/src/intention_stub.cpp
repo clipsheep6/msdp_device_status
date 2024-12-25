@@ -48,6 +48,9 @@ int32_t IntentionStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messa
         case CommonAction::STOP: {
             return Stop(intention, data, reply);
         }
+        case CommonAction::With_OPTIONS_START: {
+            return WithOptionsStart(intention, data, reply);
+        }
         case CommonAction::ADD_WATCH: {
             return AddWatch(intention, GPARAM(code), data, reply);
         }

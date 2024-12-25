@@ -67,6 +67,17 @@ int32_t InteractionManager::ActivateCoordination(const std::string &remoteNetwor
     return INTER_MGR_IMPL.ActivateCoordination(remoteNetworkId, startDeviceId, callback, isCompatible);
 }
 
+int32_t InteractionManager::ActivateCooperateWithOptions(const std::string &remoteNetworkId, int32_t startDeviceId,
+    CooperateMsgInfoCallback callback, CooperateOptions &cooperateOptions)
+{
+    FI_HILOGE("szy__InteractionManager__remoteNetworkId :%{public}s", remoteNetworkId.c_str());
+    FI_HILOGE("szy__InteractionManager__startDeviceId :%{public}d", startDeviceId);
+    FI_HILOGE("szy__InteractionManager__displayX :%{public}d", cooperateOptions.displayX);
+    FI_HILOGE("szy__InteractionManager__displayY :%{public}d", cooperateOptions.displayY);
+    FI_HILOGE("szy__InteractionManager__displayId :%{public}d", cooperateOptions.displayId);
+    return INTER_MGR_IMPL.ActivateCooperateWithOptions(remoteNetworkId, startDeviceId, callback, cooperateOptions);
+}
+
 int32_t InteractionManager::DeactivateCoordination(bool isUnchained, CooperateMsgInfoCallback callback,
     bool isCompatible)
 {

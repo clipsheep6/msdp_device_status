@@ -3844,6 +3844,10 @@ void DragDrawing::DetachToDisplay(int32_t displayId)
 void DragDrawing::UpdateDragState(DragState dragState)
 {
     dragState_ = dragState;
+    if (dragState == DragState::MOTION_DRAGGING) {
+        FI_HILOGD("Cross drag out, reset parameters");
+        dragSmoothProcessor_.ResetParameters();
+    }
 }
 
 void DragDrawing::UpdateDragWindowDisplay(int32_t displayId)

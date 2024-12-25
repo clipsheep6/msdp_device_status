@@ -77,6 +77,7 @@ private:
     int32_t ParseDeviceId(const std::string &devNode);
     void OnDeviceRemoved(std::shared_ptr<IDevice> dev);
     void OnDeviceAdded(std::shared_ptr<IDevice> dev);
+    void DeviceInfo(std::shared_ptr<IDevice> dev);
     int32_t OnAddDeviceObserver(std::weak_ptr<IDeviceObserver> observer);
     int32_t OnRemoveDeviceObserver(std::weak_ptr<IDeviceObserver> observer);
     int32_t OnRetriggerHotplug(std::weak_ptr<IDeviceObserver> observer);

@@ -80,6 +80,10 @@ public:
     void UpdateCooperateFlag(const UpdateCooperateFlagEvent &event);
     void UpdateCursorPosition();
     void ResetCursorPosition();
+    int32_t GetPointerSpeed();
+    void SetPointerSpeed(int32_t speed);
+    int32_t GetTouchPadSpeed();
+    void SetTouchPadSpeed(int32_t speed);
 
     bool IsAllowCooperate();
     void OnStartCooperate(StartCooperateData &data);
@@ -92,6 +96,12 @@ public:
     void OnResetCooperation();
     void CloseDistributedFileConnection(const std::string &remoteNetworkId);
     void RemoteStartWithOptionsSuccess(const DSoftbusCooperateOptionsFinished &event);
+    void StorePeerPointerSpeed(int32_t speed);
+    void ClearPeerPointerSpeed();
+    void StoreOriginPointerSpeed();
+    void StorePeerTouchPadSpeed(int32_t speed);
+    void ClearPeerTouchPadSpeed();
+    void StoreOriginTouchPadSpeed();
 
 #ifdef ENABLE_PERFORMANCE_CHECK
     void StartTrace(const std::string &name);
@@ -127,6 +137,10 @@ private:
     uint32_t priv_ { 0 };
     Coordinate cursorPos_ {};
     int32_t currentDisplayId_ { 0 };
+    int32_t peerPointerSpeed_ { -1 };
+    int32_t originPointerSpeed_ { -1 };
+    int32_t peerTouchPadSpeed_ { -1 };
+    int32_t originTouchPadSpeed_ { -1 };
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<IBoardObserver> boardObserver_;
     std::shared_ptr<IDeviceObserver> hotplugObserver_;

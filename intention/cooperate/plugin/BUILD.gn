@@ -48,6 +48,7 @@ ohos_shared_library("intention_cooperate") {
     "src/input_event_transmission/inner_pointer_item.cpp",
     "src/input_event_transmission/input_event_builder.cpp",
     "src/input_event_transmission/input_event_interceptor.cpp",
+    "src/input_event_transmission/input_event_sampler.cpp",
     "src/input_event_transmission/input_event_serialization.cpp",
     "src/mouse_location.cpp",
     "src/state_machine.cpp",

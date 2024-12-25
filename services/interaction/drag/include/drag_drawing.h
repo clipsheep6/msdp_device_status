@@ -242,9 +242,9 @@ public:
     ~DragDrawing();
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-    int32_t Init(const DragData &dragData, IContext* context);
+    int32_t Init(const DragData &dragData, IContext* context, bool isLongPressDrag = false);
 #else
-    int32_t Init(const DragData &dragData);
+    int32_t Init(const DragData &dragData, bool isLongPressDrag = false);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
     void NotifyDragInfo(const std::string &sourceName, const std::string &targetName);
     void Draw(int32_t displayId, int32_t displayX, int32_t displayY, bool isNeedAdjustDisplayXY = true,
@@ -270,8 +270,7 @@ public:
     void DestroyDragWindow();
     void UpdateDrawingState();
     void UpdateDragWindowState(bool visible, bool isZoomInAndAlphaChanged = false);
-    void OnStartDrag(const DragAnimationData &dragAnimationData, std::shared_ptr<Rosen::RSCanvasNode> shadowNode,
-        std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode) override;
+    void OnStartDrag(const DragAnimationData &dragAnimationData) override;
     void OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode,
         std::shared_ptr<Media::PixelMap> stylePixelMap) override;
     void OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowNode,
@@ -292,7 +291,6 @@ public:
     void DetachToDisplay(int32_t displayId);
     void ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation);
     void UpdateDragState(DragState dragState);
-    void ZoomOutAnimation();
     static std::shared_ptr<Media::PixelMap> AccessGlobalPixelMapLocked();
     static void UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pixelmap);
 
@@ -308,7 +306,7 @@ private:
     int32_t RunAnimation(std::function<int32_t()> cb);
     int32_t InitVSync(float endAlpha, float endScale);
     void OnVsync();
-    void InitDrawingInfo(const DragData &dragData);
+    void InitDrawingInfo(const DragData &dragData, bool isLongPressDrag = false);
     int32_t InitDragAnimationData(DragAnimationData &dragAnimationData);
     void RemoveModifier();
     int32_t UpdateSvgNodeInfo(xmlNodePtr curNode, int32_t extendSvgWidth);
@@ -367,7 +365,7 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     int32_t RotateDragWindow(Rosen::Rotation rotation,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool isAnimated = false);
-    void ZoomInAndAlphaChangedAnimation();
+    void ZoomOutAndAlphaChangedAnimation();
     void AlphaChangedAnimation();
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<AppExecFwk::EventHandler> GetSuperHubHandler();
@@ -386,6 +384,8 @@ private:
     void ScreenRotateAdjustDisplayXY(
         Rosen::Rotation rotation, Rosen::Rotation lastRotation, float &displayX, float &displayY);
     void UpdateDragDataForSuperHub(const DragData &dragData);
+    std::shared_ptr<Rosen::VSyncReceiver> AccessReceiverLocked();
+    void UpdateReceiverLocked(std::shared_ptr<Rosen::VSyncReceiver> receiver);
 
 private:
     int64_t interruptNum_ { -1 };
@@ -418,6 +418,7 @@ private:
     DragWindowRotationInfo DragWindowRotateInfo_;
     DragState dragState_ { DragState::STOP };
     int32_t timerId_ { -1 };
+    std::shared_mutex receiverMutex_;
 #ifdef OHOS_BUILD_ENABLE_ARKUI_X
     std::shared_ptr<OHOS::Rosen::Window> window_ { nullptr };
     std::function<void()> callback_ { nullptr };

@@ -276,7 +276,8 @@ void CooperateIn::Initial::OnRemoteStart(Context &context, const CooperateEvent 
 {
     CALL_INFO_TRACE;
     DSoftbusStartCooperate notice = std::get<DSoftbusStartCooperate>(event.event);
-
+    context.StorePeerPointerSpeed(notice.pointerSpeed);
+    context.StorePeerTouchPadSpeed(notice.touchPadSpeed);
     if (context.IsPeer(notice.networkId) || context.IsLocal(notice.networkId)) {
         return;
     }
@@ -498,7 +499,8 @@ void CooperateIn::RelayConfirmation::OnRemoteStart(Context &context, const Coope
 {
     CALL_INFO_TRACE;
     DSoftbusStartCooperate notice = std::get<DSoftbusStartCooperate>(event.event);
-
+    context.StorePeerPointerSpeed(notice.pointerSpeed);
+    context.StorePeerTouchPadSpeed(notice.touchPadSpeed);
     if (context.IsPeer(notice.networkId) || context.IsLocal(notice.networkId)) {
         return;
     }
@@ -508,7 +510,7 @@ void CooperateIn::RelayConfirmation::OnRemoteStart(Context &context, const Coope
         if (ret != Channel<CooperateEvent>::NO_ERROR) {
             FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
         }
-        OnReset(context, event);
+        OnResetWithNotifyMessage(context, event);
         return;
     }
     parent_.env_->GetTimerManager().AddTimer(DEFAULT_COOLING_TIME, REPEAT_ONCE,
@@ -567,7 +569,7 @@ void CooperateIn::RelayConfirmation::OnAppClosed(Context &context, const Coopera
     context.dsoftbus_.CloseAllSessions();
     FI_HILOGI("[relay cooperate] Stop cooperation on app closed");
     parent_.StopCooperate(context, event);
-    OnReset(context, event);
+    OnResetWithNotifyMessage(context, event);
 }
 
 void CooperateIn::RelayConfirmation::OnPointerEvent(Context &context, const CooperateEvent &event)
@@ -595,7 +597,7 @@ void CooperateIn::RelayConfirmation::OnBoardOffline(Context &context, const Coop
     if (context.IsPeer(notice.networkId)) {
         parent_.StopCooperate(context, event);
     }
-    OnReset(context, event);
+    OnResetWithNotifyMessage(context, event);
 }
 
 void CooperateIn::RelayConfirmation::OnSwitchChanged(Context &context, const CooperateEvent &event)
@@ -611,7 +613,7 @@ void CooperateIn::RelayConfirmation::OnSwitchChanged(Context &context, const Coo
     if (context.IsPeer(notice.networkId)) {
         parent_.StopCooperate(context, event);
     }
-    OnReset(context, event);
+    OnResetWithNotifyMessage(context, event);
 }
 
 void CooperateIn::RelayConfirmation::OnSoftbusSessionClosed(Context &context, const CooperateEvent &event)
@@ -625,7 +627,7 @@ void CooperateIn::RelayConfirmation::OnSoftbusSessionClosed(Context &context, co
     if (context.IsPeer(notice.networkId)) {
         parent_.StopCooperate(context, event);
     }
-    OnReset(context, event);
+    OnResetWithNotifyMessage(context, event);
 }
 
 void CooperateIn::RelayConfirmation::OnResponse(Context &context, const CooperateEvent &event)
@@ -644,7 +646,7 @@ void CooperateIn::RelayConfirmation::OnResponse(Context &context, const Cooperat
     #endif // OHOS_BUILD_ENABLE_INTERACTION_WITH_OPTIONS
         Proceed(context, event);
     } else {
-        OnReset(context, event);
+        OnResetWithNotifyMessage(context, event);
     }
 }
 
@@ -696,13 +698,15 @@ void CooperateIn::RelayConfirmation::OnProgress(Context &context, const Cooperat
     int32_t ret = context.dsoftbus_.OpenSession(remoteNetworkId);
     if (ret != RET_OK) {
         FI_HILOGE("[relay cooperate] Failed to connect to \'%{public}s\'", Utility::Anonymize(remoteNetworkId).c_str());
-        OnReset(context, event);
+        OnResetWithNotifyMessage(context, event);
         return;
     }
 
     FI_HILOGI("[relay cooperate] Notify origin(\'%{public}s\')", Utility::Anonymize(context.Peer()).c_str());
     DSoftbusRelayCooperate notice {
         .targetNetworkId = parent_.process_.Peer(),
+        .pointerSpeed = context.GetPointerSpeed(),
+        .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.dsoftbus_.RelayCooperate(context.Peer(), notice);
 
@@ -721,6 +725,13 @@ void CooperateIn::RelayConfirmation::OnProgress(Context &context, const Cooperat
 }
 
 void CooperateIn::RelayConfirmation::OnReset(Context &context, const CooperateEvent &event)
+{
+    FI_HILOGI("[relay cooperate] reset cooperation with \'%{public}s\'",
+        Utility::Anonymize(parent_.process_.Peer()).c_str());
+    Reset(context, event);
+}
+
+void CooperateIn::RelayConfirmation::OnResetWithNotifyMessage(Context &context, const CooperateEvent &event)
 {
     FI_HILOGI("[relay cooperate] reset cooperation with \'%{public}s\'",
         Utility::Anonymize(parent_.process_.Peer()).c_str());
@@ -749,6 +760,7 @@ void CooperateIn::SetPointerVisible(Context &context)
 {
     CHKPV(env_);
     bool hasLocalPointerDevice =  env_->GetDeviceManager().HasLocalPointerDevice();
+    FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
     env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
 }
 

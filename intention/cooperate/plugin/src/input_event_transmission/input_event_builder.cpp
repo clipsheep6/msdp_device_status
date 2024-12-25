@@ -43,9 +43,6 @@ const int32_t RESTORE_SCENE { 0 };
 const int32_t FORBIDDEN_SCENE { 1 };
 const int32_t UPPER_SCENE_FPS { 0 };
 const int32_t UPPER_SCENE_BW { 0 };
-constexpr double MIN_POSITIVE_RAW { 1.0 };
-constexpr double MIN_NEGATIVE_RAW { -1.0 };
-constexpr float EPSILON { 1E-6 };
 const int32_t MODE_ENABLE { 0 };
 const int32_t MODE_DISABLE { 1 };
 const std::string LOW_LATENCY_KEY = "identity";
@@ -323,7 +320,7 @@ bool InputEventBuilder::UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent> po
     return true;
 }
 
-bool InputEventBuilder::DampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+bool InputEventBuilder::DampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     MMI::PointerEvent::PointerItem item;
     if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), item)) {
@@ -335,19 +332,17 @@ bool InputEventBuilder::DampPointerMotion(std::shared_ptr<MMI::PointerEvent> poi
     // damp pointer movement even further than that could be achieved by setting pointer speed.
     // By scaling increment of pointer movement, we want to enlarge the range of pointer speed setting.
     if (item.GetRawDx() >= 0) {
-        double rawDxRight = item.GetRawDx() * GetDamplingCoefficient(DamplingDirection::DAMPLING_DIRECTION_RIGHT);
-        if (rawDxRight - MIN_POSITIVE_RAW >= EPSILON) {
-            item.SetRawDx(static_cast<int32_t>(rawDxRight));
-        } else {
-            item.SetRawDx(static_cast<int32_t>(MIN_POSITIVE_RAW));
-        }
+        double rawDxRight = rawDxRightRemainder_ + item.GetRawDx() * GetDamplingCoefficient(
+            DamplingDirection::DAMPLING_DIRECTION_RIGHT);
+        int32_t rawDxIntegerRight = static_cast<int32_t>(rawDxRight);
+        rawDxRightRemainder_ = rawDxRight - static_cast<double>(rawDxIntegerRight);
+        item.SetRawDx(rawDxIntegerRight);
     } else {
-        double rawDxLeft = item.GetRawDx() * GetDamplingCoefficient(DamplingDirection::DAMPLING_DIRECTION_LEFT);
-        if (rawDxLeft - MIN_NEGATIVE_RAW < EPSILON) {
-            item.SetRawDx(static_cast<int32_t>(rawDxLeft));
-        } else {
-            item.SetRawDx(static_cast<int32_t>(MIN_NEGATIVE_RAW));
-        }
+        double rawDxLeft = rawDxLeftRemainder_ + item.GetRawDx() * GetDamplingCoefficient(
+            DamplingDirection::DAMPLING_DIRECTION_LEFT);
+        int32_t rawDxIntegerLeft = static_cast<int32_t>(rawDxLeft);
+        rawDxLeftRemainder_ = rawDxLeft - static_cast<double>(rawDxIntegerLeft);
+        item.SetRawDx(rawDxIntegerLeft);
     }
     if (item.GetRawDy() >= 0) {
         item.SetRawDy(static_cast<int32_t>(

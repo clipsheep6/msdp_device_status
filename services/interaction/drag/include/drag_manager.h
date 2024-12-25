@@ -86,6 +86,7 @@ public:
     void GetAllowDragState(bool &isAllowDrag) override;
     void DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     int32_t OnDragUp(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    void OnDragCancel(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     void OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent);
 #else

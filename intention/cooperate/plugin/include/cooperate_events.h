@@ -149,6 +149,11 @@ struct DDMBoardOnlineEvent {
     int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
 };
 
+struct StatusChangeEvent {
+    std::string networkId;
+    CoordinationMessage msg { CoordinationMessage::UNKNOW };
+};
+
 using DDMBoardOfflineEvent = DDMBoardOnlineEvent;
 using DDPCooperateSwitchChanged = DDMBoardOnlineEvent;
 
@@ -181,6 +186,8 @@ struct DSoftbusStartCooperate {
     NormalizedCoordinate cursorPos;
     StartCooperateData extra;
     int32_t errCode { static_cast<int32_t>(CoordinationErrCode::COORDINATION_OK) };
+    int32_t pointerSpeed { -1 };
+    int32_t touchPadSpeed { -1 };
 };
 
 struct DSoftbusCooperateOptions {
@@ -203,6 +210,8 @@ struct DSoftbusRelayCooperate {
     std::string networkId;
     std::string targetNetworkId;
     bool normal;
+    int32_t pointerSpeed { -1 };
+    int32_t touchPadSpeed { -1 };
 };
 
 struct DSoftbusSubscribeMouseLocation {

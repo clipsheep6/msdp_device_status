@@ -24,7 +24,6 @@
 #include "fi_log.h"
 #include "nocopyable.h"
 #include "securec.h"
-#include "devicestatus_define.h"
 
 #undef LOG_TAG
 #define LOG_TAG "StreamBuffer"

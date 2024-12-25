@@ -91,6 +91,10 @@ ErrCode DeviceStatusMsdpClientImpl::MockHandle(Type type)
         iter->second++;
     }
     RegisterMock();
+    if (type > TYPE_MAX || type < TYPE_INVALID) {
+        FI_HILOGE("Type invalid");
+        return RET_ERR;
+    }
     FI_HILOGI("mockCallCounts_:%{public}d", mockCallCounts_[type]);
     return RET_OK;
 }
@@ -401,6 +405,10 @@ IMsdp* DeviceStatusMsdpClientImpl::GetMockInst(Type type)
 {
     CALL_DEBUG_ENTER;
     CHKPP(mock_.handle);
+    if (type > TYPE_MAX || type < TYPE_INVALID) {
+        FI_HILOGE("Type invalid");
+        return nullptr;
+    }
     if (mock_.pAlgorithm == nullptr) {
         mock_.pAlgorithm = mock_.create();
         mockCallCounts_[type] = 0;

@@ -30,9 +30,7 @@ class IDragAnimation {
 public:
     IDragAnimation() = default;
     virtual ~IDragAnimation() = default;
-    virtual void OnStartDrag(const DragAnimationData &dragAnimationData,
-        std::shared_ptr<Rosen::RSCanvasNode> shadowNode,
-        std::shared_ptr<Rosen::RSCanvasNode> styleNode) = 0;
+    virtual void OnStartDrag(const DragAnimationData &dragAnimationData) = 0;
     virtual void OnDragStyle(std::shared_ptr<Rosen::RSCanvasNode> styleNode,
         std::shared_ptr<Media::PixelMap> stylePixelMap) = 0;
     virtual void OnStopDragSuccess(std::shared_ptr<Rosen::RSCanvasNode> shadowNode,

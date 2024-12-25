@@ -20,6 +20,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 
+#include "devicestatus_define.h"
 #include "key_event.h"
 #include "input_event_interceptor.h"
 #include "input_event_serialization.h"

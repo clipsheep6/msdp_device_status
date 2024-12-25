@@ -139,7 +139,7 @@ constexpr int32_t NUM_ONE { 1 };
 constexpr int32_t NUM_TWO { 2 };
 constexpr int32_t NUM_FOUR { 4 };
 constexpr int32_t ALPHA_DURATION { 150 };
-constexpr int32_t ZOOM_DURATION { 250 };
+constexpr int32_t ZOOM_DURATION { 300 };
 const Rosen::RSAnimationTimingCurve ZOOM_CURVE =
     Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
 const Rosen::RSAnimationTimingCurve ALPHA_CURVE =
@@ -147,7 +147,6 @@ const Rosen::RSAnimationTimingCurve ALPHA_CURVE =
 const Rosen::RSAnimationTimingCurve SPRING = Rosen::RSAnimationTimingCurve::CreateSpring(0.347f, 0.99f, 0.0f);
 constexpr int32_t HEX_FF { 0xFF };
 const std::string RENDER_THREAD_NAME { "os_dargRenderRunner" };
-constexpr float ZOOM_SCALE { 1.04f };
 constexpr float BEZIER_000 { 0.00f };
 constexpr float BEZIER_020 { 0.20f };
 constexpr float BEZIER_030 { 0.30f };
@@ -267,9 +266,9 @@ float GetScaling()
 } // namespace
 
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
-int32_t DragDrawing::Init(const DragData &dragData, IContext* context)
+int32_t DragDrawing::Init(const DragData &dragData, IContext* context, bool isLongPressDrag)
 #else
-int32_t DragDrawing::Init(const DragData &dragData)
+int32_t DragDrawing::Init(const DragData &dragData, bool isLongPressDrag)
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 {
     FI_HILOGI("enter");
@@ -277,7 +276,7 @@ int32_t DragDrawing::Init(const DragData &dragData)
     if (INIT_SUCCESS != checkDragDataResult) {
         return checkDragDataResult;
     }
-    InitDrawingInfo(dragData);
+    InitDrawingInfo(dragData, isLongPressDrag);
     UpdateDragDataForSuperHub(dragData);
     CreateWindow();
     CHKPR(g_drawingInfo.surfaceNode, INIT_FAIL);
@@ -290,18 +289,10 @@ int32_t DragDrawing::Init(const DragData &dragData)
         FI_HILOGE("Init drag animation data or check nodes valid failed");
         return INIT_FAIL;
     }
-    if (g_drawingInfo.nodes.size() <= DRAG_STYLE_INDEX || g_drawingInfo.nodes.size() <= PIXEL_MAP_INDEX) {
-        FI_HILOGE("The index is out of bounds, node size is %{public}zu", g_drawingInfo.nodes.size());
-        return INIT_FAIL;
-    }
-    std::shared_ptr<Rosen::RSCanvasNode> shadowNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
-    CHKPR(shadowNode, INIT_FAIL);
-    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-    CHKPR(dragStyleNode, INIT_FAIL);
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     LoadDragDropLib();
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
-    OnStartDrag(dragAnimationData, shadowNode, dragStyleNode);
+    OnStartDrag(dragAnimationData);
     if (!g_drawingInfo.multiSelectedNodes.empty()) {
         g_drawingInfo.isCurrentDefaultStyle = true;
         UpdateDragStyle(DragCursorStyle::MOVE);
@@ -783,7 +774,7 @@ void DragDrawing::UpdateDragWindowState(bool visible, bool isZoomInAndAlphaChang
         CHKPV(dragStyleNode);
         dragStyleNode->SetAlpha(0.0f);
         g_drawingInfo.surfaceNode->SetVisible(true);
-        ZoomInAndAlphaChangedAnimation();
+        ZoomOutAndAlphaChangedAnimation();
     } else {
         g_drawingInfo.surfaceNode->SetVisible(visible);
     }
@@ -817,7 +808,7 @@ void DragDrawing::AlphaChangedAnimation()
     },  []() { FI_HILOGD("AlphaChanged end"); });
 }
 
-void DragDrawing::ZoomInAndAlphaChangedAnimation()
+void DragDrawing::ZoomOutAndAlphaChangedAnimation()
 {
     FI_HILOGD("enter");
     if (!CheckNodesValid()) {
@@ -825,71 +816,20 @@ void DragDrawing::ZoomInAndAlphaChangedAnimation()
         return;
     }
     AlphaChangedAnimation();
-    CHKPV(g_drawingInfo.parentNode);
-    g_drawingInfo.parentNode->SetScale(1.0f);
-    if (!g_drawingInfo.multiSelectedNodes.empty()) {
-        size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
-        for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
-            std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
-            CHKPV(multiSelectedNode);
-            multiSelectedNode->SetScale(1.0f);
-        }
-    }
-    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-    CHKPV(dragStyleNode);
-    dragStyleNode->SetScale(1.0f);
-
-    Rosen::RSAnimationTimingProtocol protocolZoomIn;
-    protocolZoomIn.SetDuration(ZOOM_DURATION);
-    Rosen::RSNode::Animate(protocolZoomIn, ZOOM_CURVE, [&]() {
-        CHKPV(g_drawingInfo.parentNode);
-        g_drawingInfo.parentNode->SetScale(ZOOM_SCALE);
-        if (!g_drawingInfo.multiSelectedNodes.empty()) {
-            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
-            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
-                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
-                CHKPV(multiSelectedNode);
-                multiSelectedNode->SetScale(ZOOM_SCALE);
-            }
-        }
-        std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-        CHKPV(dragStyleNode);
-        dragStyleNode->SetScale(ZOOM_SCALE);
-    },  []() { FI_HILOGD("ZoomIn end"); });
-    g_drawingInfo.startNum = START_TIME;
-    g_drawingInfo.needDestroyDragWindow = false;
-    StartVsync();
-    FI_HILOGD("leave");
-    return;
-}
-
-void DragDrawing::ZoomOutAnimation()
-{
-    FI_HILOGD("enter");
-    if (!CheckNodesValid()) {
-        FI_HILOGE("Check nodes valid failed");
-        return;
-    }
-    std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-    CHKPV(dragStyleNode);
-    dragStyleNode->SetScale(1.0f);
     Rosen::RSAnimationTimingProtocol protocolZoomOut;
     protocolZoomOut.SetDuration(ZOOM_DURATION);
     Rosen::RSNode::Animate(protocolZoomOut, ZOOM_CURVE, [&]() {
-        CHKPV(g_drawingInfo.parentNode);
-        g_drawingInfo.parentNode->SetScale(1.0f);
-        if (!g_drawingInfo.multiSelectedNodes.empty()) {
-            size_t multiSelectedNodesSize = g_drawingInfo.multiSelectedNodes.size();
-            for (size_t i = 0; i < multiSelectedNodesSize; ++i) {
-                std::shared_ptr<Rosen::RSCanvasNode> multiSelectedNode = g_drawingInfo.multiSelectedNodes[i];
-                CHKPV(multiSelectedNode);
-                multiSelectedNode->SetScale(1.0f);
-            }
-        }
-        std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode = g_drawingInfo.nodes[DRAG_STYLE_INDEX];
-        CHKPV(dragStyleNode);
-        dragStyleNode->SetScale(1.0f);
+        ShadowInfo shadowInfo;
+        auto currentPixelMap = DragDrawing::AccessGlobalPixelMapLocked();
+        CHKPV(currentPixelMap);
+        float widthScale = CalculateWidthScale();
+        currentPixelMap->scale(widthScale, widthScale, Media::AntiAliasingOption::HIGH);
+        shadowInfo.pixelMap = currentPixelMap;
+        shadowInfo.x = g_drawingInfo.pixelMapX * widthScale;
+        shadowInfo.y = g_drawingInfo.pixelMapY * widthScale;
+        UpdateShadowPic(shadowInfo);
     },  []() { FI_HILOGD("ZoomOut end"); });
+
     g_drawingInfo.startNum = START_TIME;
     g_drawingInfo.needDestroyDragWindow = false;
     StartVsync();
@@ -897,10 +837,14 @@ void DragDrawing::ZoomOutAnimation()
     return;
 }
 
-void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData,
-    std::shared_ptr<Rosen::RSCanvasNode> shadowNode, std::shared_ptr<Rosen::RSCanvasNode> dragStyleNode)
+void DragDrawing::OnStartDrag(const DragAnimationData &dragAnimationData)
 {
     FI_HILOGI("enter");
+    if (g_drawingInfo.nodes.size() <= PIXEL_MAP_INDEX) {
+        FI_HILOGE("The index is out of bounds, node size is %{public}zu", g_drawingInfo.nodes.size());
+        return;
+    }
+    std::shared_ptr<Rosen::RSCanvasNode> shadowNode = g_drawingInfo.nodes[PIXEL_MAP_INDEX];
     CHKPV(shadowNode);
     if (DrawShadow(shadowNode) != RET_OK) {
         FI_HILOGE("Draw shadow failed");
@@ -1389,7 +1333,6 @@ void DragDrawing::FlushDragPosition(uint64_t nanoTimestamp)
         "OnDragMove,displayX:" + std::to_string(event.displayX) + ",displayY:" + std::to_string(event.displayY));
     UpdateDragPosition(event.displayId, event.displayX, event.displayY);
     FinishTrace(HITRACE_TAG_MSDP);
-    vSyncStation_.RequestFrame(TYPE_FLUSH_DRAG_POSITION, frameCallback_);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 }
 
@@ -1402,6 +1345,14 @@ void DragDrawing::OnDragMove(int32_t displayId, int32_t displayX, int32_t displa
 #ifdef IOS_PLATFORM
     actionTime_ = actionTime;
 #endif // IOS_PLATFORM
+
+#ifdef OHOS_BUILD_PC_PRODUCT
+    if (g_drawingInfo.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        UpdateDragPosition(displayId, displayX, displayY);
+        return;
+    }
+#endif // OHOS_BUILD_PC_PRODUCT
+
 #ifndef OHOS_BUILD_ENABLE_ARKUI_X
     std::chrono::microseconds microseconds(actionTime);
     TimeStamp time(microseconds);
@@ -1468,15 +1419,17 @@ int32_t DragDrawing::InitVSync(float endAlpha, float endScale)
 int32_t DragDrawing::StartVsync()
 {
     FI_HILOGI("enter");
-    if (receiver_ == nullptr) {
+    auto currentReceiver = AccessReceiverLocked();
+    if (currentReceiver == nullptr) {
         CHKPR(handler_, RET_ERR);
-        receiver_ = Rosen::RSInterfaces::GetInstance().CreateVSyncReceiver("DragDrawing", handler_);
-        CHKPR(receiver_, RET_ERR);
+        currentReceiver = Rosen::RSInterfaces::GetInstance().CreateVSyncReceiver("DragDrawing", handler_);
+        CHKPR(currentReceiver, RET_ERR);
+        UpdateReceiverLocked(currentReceiver);
     }
 #ifdef IOS_PLATFORM
     rsUiDirector_->FlushAnimation(g_drawingInfo.startNum);
 #endif // IOS_PLATFORM
-    int32_t ret = receiver_->Init();
+    int32_t ret = currentReceiver->Init();
     if (ret != RET_OK) {
         FI_HILOGE("Receiver init failed");
         return RET_ERR;
@@ -1485,7 +1438,7 @@ int32_t DragDrawing::StartVsync()
         .userData_ = this,
         .callback_ = [this](int64_t parm1, void *parm2) { this->OnVsync(); }
     };
-    ret = receiver_->RequestNextVSync(fcb);
+    ret = currentReceiver->RequestNextVSync(fcb);
     if (ret != RET_OK) {
         FI_HILOGE("Request next vsync failed");
     }
@@ -1512,8 +1465,9 @@ void DragDrawing::OnVsync()
         .userData_ = this,
         .callback_ = [this](int64_t parm1, void *parm2) { this->OnVsync(); }
     };
-    CHKPV(receiver_);
-    int32_t ret = receiver_->RequestNextVSync(fcb);
+    auto currentReceiver = AccessReceiverLocked();
+    CHKPV(currentReceiver);
+    int32_t ret = currentReceiver->RequestNextVSync(fcb);
     if (ret != RET_OK) {
         FI_HILOGE("Request next vsync failed");
     }
@@ -1522,7 +1476,7 @@ void DragDrawing::OnVsync()
     FI_HILOGD("leave");
 }
 
-void DragDrawing::InitDrawingInfo(const DragData &dragData)
+void DragDrawing::InitDrawingInfo(const DragData &dragData, bool isLongPressDrag)
 {
     g_drawingInfo.isRunning = true;
     if (dragData.shadowInfos.empty()) {
@@ -3007,7 +2961,7 @@ void DragDrawing::ResetAnimationParameter()
     handler_->RemoveAllFileDescriptorListeners();
 #endif // IOS_PLATFORM
     handler_ = nullptr;
-    receiver_ = nullptr;
+    UpdateReceiverLocked(nullptr);
     FI_HILOGI("leave");
 }
 
@@ -3238,6 +3192,18 @@ void DragDrawing::UpdataGlobalPixelMapLocked(std::shared_ptr<Media::PixelMap> pi
 {
     std::unique_lock<std::shared_mutex> lock(g_pixelMapLock);
     g_drawingInfo.pixelMap = pixelmap;
+}
+
+std::shared_ptr<Rosen::VSyncReceiver> DragDrawing::AccessReceiverLocked()
+{
+    std::shared_lock<std::shared_mutex> lock(receiverMutex_);
+    return receiver_;
+}
+
+void DragDrawing::UpdateReceiverLocked(std::shared_ptr<Rosen::VSyncReceiver> receiver)
+{
+    std::unique_lock<std::shared_mutex> lock(receiverMutex_);
+    receiver_ = receiver;
 }
 
 void DragDrawing::ScreenRotate(Rosen::Rotation rotation, Rosen::Rotation lastRotation)

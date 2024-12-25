@@ -17,6 +17,7 @@
 
 #include "device.h"
 #include "device_manager.h"
+#include "devicestatus_define.h"
 #include "fi_log.h"
 
 #undef LOG_TAG

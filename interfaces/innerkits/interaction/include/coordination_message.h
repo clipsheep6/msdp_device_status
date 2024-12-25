@@ -28,7 +28,10 @@ enum class CoordinationMessage {
     DEACTIVATE_SUCCESS = 5,
     DEACTIVATE_FAIL = 6,
     SESSION_CLOSED = 7,
-    COORDINATION_SUCCESS = 8
+    COORDINATION_SUCCESS = 8,
+    COORDINATION_STATUS_FREE = 9,
+    COORDINATION_STATUS_OUT = 10,
+    COORDINATION_STATUS_IN = 11
 };
 
 enum class CoordinationErrCode {

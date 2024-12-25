@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Msdp {
 namespace DeviceStatus {
  
-typedef bool (*InitUniversalDragFunc)(IContext*);
+typedef bool (*InitFunc)(IContext*);
 typedef void (*RemoveUniversalDragFunc)(void);
 typedef void (*SetDragableStateFunc)(bool);
 typedef void (*SetDragSwitchStateFunc)(bool);
@@ -41,7 +41,7 @@ public:
 private:
     IContext* env_ { nullptr };
     void* universalDragHandle_ { nullptr };
-    InitUniversalDragFunc initUniversalDragHandle_ { nullptr };
+    InitFunc initUniversalDragHandle_ { nullptr };
     RemoveUniversalDragFunc removeUniversalDragHandle_ { nullptr };
     SetDragableStateFunc setDragableStateHandle_ { nullptr };
     SetDragSwitchStateFunc setDragSwitchStateHandle_ { nullptr };

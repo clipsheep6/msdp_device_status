@@ -178,6 +178,7 @@ if (!is_arkui_x) {
       "${file_framework_root_path}/window_manager/interfaces/innerkits/wm",
       "${file_framework_root_path}/window_manager/utils/include",
       "${file_arkui_root_path}/ace_engine",
+      "${file_arkui_root_path}/ace_engine/interfaces/inner_api/ace_kit/include",
       "${foundation_graphic_path}/graphic_surface/interfaces/inner_api/surface",
     ]
 

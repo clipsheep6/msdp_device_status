@@ -125,7 +125,8 @@ int32_t DSoftbusHandler::StartCooperate(const std::string &networkId, const DSof
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
     packet << event.originNetworkId << event.cursorPos.x
-        << event.cursorPos.y << event.success << event.extra.priv;
+        << event.cursorPos.y << event.success << event.extra.priv << event.pointerSpeed
+        << event.touchPadSpeed;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -203,7 +204,7 @@ int32_t DSoftbusHandler::RelayCooperate(const std::string &networkId, const DSof
 {
     CALL_INFO_TRACE;
     NetPacket packet(MessageId::DSOFTBUS_RELAY_COOPERATE);
-    packet << event.targetNetworkId;
+    packet << event.targetNetworkId << event.pointerSpeed << event.touchPadSpeed;
     if (packet.ChkRWError()) {
         FI_HILOGE("Failed to write data packet");
         return RET_ERR;
@@ -316,6 +317,16 @@ void DSoftbusHandler::OnStartCooperate(const std::string &networkId, NetPacket &
     if (packet.ChkRWError()) {
         event.extra.priv = 0;
     }
+    packet >> event.pointerSpeed;
+    if (packet.ChkRWError()) {
+        event.pointerSpeed = -1;
+    }
+    FI_HILOGI("Cur pointerSpeed:%{public}d", event.pointerSpeed);
+    packet >> event.touchPadSpeed;
+    if (packet.ChkRWError()) {
+        event.touchPadSpeed = -1;
+    }
+    FI_HILOGI("Cur touchPadSpeed:%{public}d", event.touchPadSpeed);
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_START_COOPERATE,
         event));
@@ -409,6 +420,16 @@ void DSoftbusHandler::OnRelayCooperate(const std::string &networkId, NetPacket &
         FI_HILOGE("Failed to read data packet");
         return;
     }
+    packet >> event.pointerSpeed;
+    if (packet.ChkRWError()) {
+        event.pointerSpeed = -1;
+    }
+    FI_HILOGI("Cur pointerSpeed:%{public}d", event.pointerSpeed);
+    packet >> event.touchPadSpeed;
+    if (packet.ChkRWError()) {
+        event.touchPadSpeed = -1;
+    }
+    FI_HILOGI("Cur touchPadSpeed:%{public}d", event.touchPadSpeed);
     SendEvent(CooperateEvent(
         CooperateEventType::DSOFTBUS_RELAY_COOPERATE,
         event));

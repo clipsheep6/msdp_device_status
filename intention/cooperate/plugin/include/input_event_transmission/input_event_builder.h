@@ -100,7 +100,7 @@ private:
     bool IsActive(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ResetPressedEvents();
     double GetDamplingCoefficient(DamplingDirection direction) const;
-    bool DampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
+    bool DampPointerMotion(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     void ExecuteInner();
     void HandleStopTimer();
 
@@ -112,6 +112,8 @@ private:
     size_t nDropped_ { 0 };
     bool scanState_ { true };
     int32_t pointerEventTimer_ { -1 };
+    double rawDxRightRemainder_ { 0.0 };
+    double rawDxLeftRemainder_ { 0.0 };
     std::string remoteNetworkId_;
     std::array<double, N_DAMPLING_DIRECTIONS> damplingCoefficients_;
     std::shared_ptr<DSoftbusObserver> observer_;

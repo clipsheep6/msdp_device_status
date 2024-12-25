@@ -29,6 +29,7 @@ declare_args() {
   device_status_enable_universal_drag = false
   device_status_device_type = "default"
   device_status_interaction_with_options = false
+  device_status_motion_enable = false
 
   # origin variables sets
   if (!is_arkui_x) {
@@ -43,6 +44,9 @@ declare_args() {
       }
       if (defined(global_parts_info.resourceschedule_memmgr_override)) {
         device_status_memmgr_enable = true
+      }
+      if (defined(global_parts_info.msdp_motion)) {
+        device_status_motion_enable = true
       }
     }
   } else {  # is_arkui_x

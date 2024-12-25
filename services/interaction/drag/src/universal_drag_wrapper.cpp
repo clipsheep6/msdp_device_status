@@ -40,7 +40,7 @@ bool UniversalDragWrapper::InitUniversalDrag()
     }
     if (initUniversalDragHandle_ == nullptr) {
         initUniversalDragHandle_ =
-            reinterpret_cast<InitUniversalDragFunc>(dlsym(universalDragHandle_, "InitUniversalDrag"));
+            reinterpret_cast<InitFunc>(dlsym(universalDragHandle_, "Init"));
         if ((error = dlerror()) != nullptr) {
             FI_HILOGE("Symbol InitUniversalDrag error: %{public}s", error);
             return false;

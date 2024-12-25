@@ -25,7 +25,6 @@
 #include <regex>
 #include <sstream>
 
-#include <openssl/sha.h>
 #include <securec.h>
 
 #include "devicestatus_define.h"

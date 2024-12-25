@@ -148,6 +148,8 @@ void CooperateFree::Initial::OnStart(Context &context, const CooperateEvent &eve
         .originNetworkId = context.Local(),
         .success = true,
         .cursorPos = context.NormalizedCursorPosition(),
+        .pointerSpeed = context.GetPointerSpeed(),
+        .touchPadSpeed = context.GetTouchPadSpeed(),
     };
     context.OnStartCooperate(startNotice.extra);
     context.dsoftbus_.StartCooperate(context.Peer(), startNotice);
@@ -228,6 +230,11 @@ void CooperateFree::Initial::OnDisable(Context &context, const CooperateEvent &e
 {
     FI_HILOGI("[disable cooperation] Stop cooperation");
     CHKPV(parent_.env_);
+    auto dragState = parent_.env_->GetDragManager().GetDragState();
+    if (dragState == DragState::START) {
+        FI_HILOGI("drag state is start");
+        return;
+    }
     bool hasLocalPointerDevice =  parent_.env_->GetDeviceManager().HasLocalPointerDevice();
     FI_HILOGI("HasLocalPointerDevice:%{public}s", hasLocalPointerDevice ? "true" : "false");
     parent_.env_->GetInput().SetPointerVisibility(hasLocalPointerDevice, PRIORITY);
@@ -243,6 +250,8 @@ void CooperateFree::Initial::OnRemoteStart(Context &context, const CooperateEven
 {
     CALL_INFO_TRACE;
     DSoftbusStartCooperate notice = std::get<DSoftbusStartCooperate>(event.event);
+    context.StorePeerPointerSpeed(notice.pointerSpeed);
+    context.StorePeerTouchPadSpeed(notice.pointerSpeed);
     context.OnRemoteStartCooperate(notice.extra);
     context.eventMgr_.RemoteStart(notice);
     context.RemoteStartSuccess(notice);

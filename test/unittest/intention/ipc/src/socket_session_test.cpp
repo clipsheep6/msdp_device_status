@@ -18,6 +18,7 @@
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
 
+#include "devicestatus_define.h"
 #include "i_context.h"
 #include "i_plugin.h"
 #include "socket_client.h"

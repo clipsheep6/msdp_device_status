@@ -12,15 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "drag_manager_test.h"
+
 #define BUFF_SIZE 100
 #include <future>
 #include "pointer_event.h"
 #include "securec.h"
 #include "message_parcel.h"
 
-#include "drag_manager_test.h"
-#include "drag_params.h"
+#include "devicestatus_define.h"
 #include "devicestatus_errors.h"
+#include "drag_params.h"
 #include "interaction_manager.h"
 #include "stationary_data.h"
 

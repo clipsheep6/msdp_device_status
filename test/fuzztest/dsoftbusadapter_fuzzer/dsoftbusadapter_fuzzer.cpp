@@ -136,7 +136,6 @@ bool EnableFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-    SetGlobalFuzzData(data, size);
 
     DSoftbusAdapterImpl::GetInstance()->Enable();
     DSoftbusAdapterImpl::GetInstance()->SetupServer();
@@ -152,8 +151,7 @@ bool AddObserverFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-    SetGlobalFuzzData(data, size);
-    
+
     std::shared_ptr<IDSoftbusObserver> observer = std::make_shared<DSoftbusObserver>();
     DSoftbusAdapterImpl::GetInstance()->AddObserver(observer);
     DSoftbusAdapterImpl::GetInstance()->RemoveObserver(observer);
@@ -165,8 +163,7 @@ bool CheckDeviceOnlineFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-    SetGlobalFuzzData(data, size);
-    
+
     std::string networkId = GetStringFromData(STR_LEN);
     CircleStreamBuffer circleBuffer;
 
@@ -183,8 +180,7 @@ bool OpenSessionFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-    SetGlobalFuzzData(data, size);
-    
+
     std::string networkId = GetStringFromData(STR_LEN);
     DSoftbusAdapterImpl::GetInstance()->OpenSession(networkId);
     DSoftbusAdapterImpl::GetInstance()->FindConnection(networkId);
@@ -199,8 +195,7 @@ bool SendPacketFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-    SetGlobalFuzzData(data, size);
-    
+
     Parcel parcel;
     NetPacket packet(MessageId::DSOFTBUS_START_COOPERATE);
     std::string networkId = GetStringFromData(STR_LEN);
@@ -216,8 +211,7 @@ bool InitSocketFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-    SetGlobalFuzzData(data, size);
-    
+
     int32_t socket = GetData<int32_t>();
     uint32_t dataLen = GetData<uint32_t>();
     std::string networkId = GetStringFromData(STR_LEN);
@@ -230,7 +224,7 @@ bool InitSocketFuzzTest(const uint8_t* data, size_t size)
         .pkgName = pkgName,
         .dataType = DATA_TYPE_BYTES
     };
-    
+
     DSoftbusAdapterImpl::GetInstance()->InitSocket(info, socket, socket);
     DSoftbusAdapterImpl::GetInstance()->ConfigTcpAlive(socket);
     DSoftbusAdapterImpl::GetInstance()->OnShutdown(socket, SHUTDOWN_REASON_UNKNOWN);
@@ -244,7 +238,6 @@ bool DDMAdapterFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < 1)) {
         return false;
     }
-    SetGlobalFuzzData(data, size);
 
     SetPermission(SYSTEM_CORE, g_cores, sizeof(g_cores) / sizeof(g_cores[0]));
     DDMAdapter ddmAdapter;
@@ -262,6 +255,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (data == nullptr) {
         return 0;
     }
+    SetGlobalFuzzData(data, size);
 
     OHOS::Msdp::DeviceStatus::EnableFuzzTest(data, size);
     OHOS::Msdp::DeviceStatus::AddObserverFuzzTest(data, size);

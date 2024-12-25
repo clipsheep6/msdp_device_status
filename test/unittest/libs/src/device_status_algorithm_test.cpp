@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
+#include "devicestatus_define.h"
 
 #define private public
 #include "devicestatus_algorithm_manager.h"

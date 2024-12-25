@@ -269,6 +269,7 @@ int32_t DragManager::StartDrag(
         ReportStartDragFailedRadarInfo(StageRes::RES_FAIL, DragRadarErrCode::INVALID_DRAG_DATA, __func__, packageName);
         return RET_ERR;
     }
+    isLongPressDrag_ = isLongPressDrag;
     if (OnStartDrag(packageName, pid) != RET_OK) {
 #ifdef MSDP_HIVIEWDFX_HISYSEVENT_ENABLE
         DragDFX::WriteStartDrag(dragState_, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT);
@@ -277,7 +278,6 @@ int32_t DragManager::StartDrag(
         ResetMouseDragMonitorInfo();
         return RET_ERR;
     }
-    isLongPressDrag_ = isLongPressDrag;
     if (notifyPUllUpCallback_ != nullptr) {
         notifyPUllUpCallback_(false);
     }
@@ -659,25 +659,28 @@ void DragManager::DragCallback(std::shared_ptr<MMI::PointerEvent> pointerEvent)
         dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
         lastDisplayId_ = targetDisplayId;
     }
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL) {
+        dragDrawing_.StopVSyncStation();
+        mouseDragMonitorDisplayX_ = -1;
+        mouseDragMonitorDisplayY_ = -1;
+        OnDragCancel(pointerEvent);
+    }
     FI_HILOGD("Unknown action, sourceType:%{public}d, pointerId:%{public}d, pointerAction:%{public}d",
         pointerEvent->GetSourceType(), pointerEvent->GetPointerId(), pointerAction);
 }
 
 void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
-    if (needLongPressDragAnimation_ && isLongPressDrag_) {
-        dragDrawing_.ZoomOutAnimation();
-        needLongPressDragAnimation_ = false;
-    }
     CHKPV(pointerEvent);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t displayX = pointerItem.GetDisplayX();
     int32_t displayY = pointerItem.GetDisplayY();
-    FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d, "
-        "pullId:%{public}d", pointerEvent->GetSourceType(), pointerId, displayX, displayY, pointerEvent->GetPullId());
     int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
+    FI_HILOGD("SourceType:%{public}d, pointerId:%{public}d, displayX:%{private}d, displayY:%{private}d, "
+        "targetDisplayId:%{public}d, pullId:%{public}d", pointerEvent->GetSourceType(), pointerId, displayX, displayY,
+        targetDisplayId, pointerEvent->GetPullId());
     if (lastDisplayId_ == -1) {
         lastDisplayId_ = targetDisplayId;
         dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
@@ -692,6 +695,33 @@ void DragManager::OnDragMove(std::shared_ptr<MMI::PointerEvent> pointerEvent)
     } else {
         dragDrawing_.OnDragMove(targetDisplayId, displayX, displayY, pointerEvent->GetActionTime());
     }
+}
+
+void DragManager::OnDragCancel(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+{
+    FI_HILOGI("enter");
+    CHKPV(pointerEvent);
+    if (dragState_ != DragState::START) {
+        FI_HILOGW("No drag instance running");
+        return;
+    }
+    DragData dragData = DRAG_DATA_MGR.GetDragData();
+    if (dragData.sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        dragDrawing_.EraseMouseIcon();
+        FI_HILOGI("Set the pointer cursor visible");
+        MMI::InputManager::GetInstance()->SetPointerVisible(true);
+    }
+    DragDropResult dropResult { DragResult::DRAG_CANCEL, false, -1 };
+    StopDrag(dropResult);
+    DragRadarInfo dragRadarInfo;
+    dragRadarInfo.funcName = __func__;
+    dragRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_END);
+    dragRadarInfo.bizStage = static_cast<int32_t>(BizStage::STAGE_STOP_DRAG);
+    dragRadarInfo.stageRes = static_cast<int32_t>(StageRes::RES_FAIL);
+    dragRadarInfo.errCode = static_cast<int32_t>(DragRadarErrCode::DRAG_STOP_CANCEL);
+    dragRadarInfo.hostName = "";
+    dragRadarInfo.callingPid = "";
+    ReportDragRadarInfo(dragRadarInfo);
 }
 #endif // OHOS_BUILD_ENABLE_ARKUI_X
 
@@ -1094,7 +1124,7 @@ int32_t DragManager::OnStartDrag(const std::string &packageName, int32_t pid)
             dragDrawing_.SetScreenId(screenId_);
         }
     }
-    int32_t ret = dragDrawing_.Init(dragData, context_);
+    int32_t ret = dragDrawing_.Init(dragData, context_, isLongPressDrag_);
 #else
     int32_t ret = dragDrawing_.Init(dragData);
 #endif // OHOS_BUILD_ENABLE_ARKUI_X

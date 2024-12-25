@@ -30,6 +30,7 @@ namespace {
 const char* DRAG_CLASS { "drag_class" };
 const char* DRAG { "drag" };
 inline constexpr size_t MAX_STRING_LEN { 1024 };
+inline constexpr size_t MAX_PKG_NAME_LEN { 128 };
 inline constexpr std::string_view GET_VALUE_BOOL { "napi_get_value_bool" };
 } // namespace
 
@@ -283,8 +284,9 @@ napi_value JsDragContext::SetAppDragSwitchState(napi_env env, napi_callback_info
     char param[MAX_STRING_LEN] = { 0 };
     size_t length = 0;
     CHKRP(napi_get_value_string_utf8(env, argv[ONE_PARAM], param, sizeof(param), &length), CREATE_STRING_UTF8);
-    if (!length) {
-        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Parameter pkgName is empty");
+    if (length <= 0 || length > MAX_PKG_NAME_LEN) {
+        FI_HILOGE("Invalid pkgName length:%{public}zu", length);
+        THROWERR_CUSTOM(env, COMMON_PARAMETER_ERROR, "Invalid pkgName length");
         return nullptr;
     }
     std::string pkgName = param;

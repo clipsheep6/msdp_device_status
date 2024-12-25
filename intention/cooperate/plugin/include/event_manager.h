@@ -85,6 +85,7 @@ public:
     void RemoteStopFinish(const DSoftbusStopCooperateFinished &event);
     void OnProfileChanged(const DDPCooperateSwitchChanged &event);
     void OnSoftbusSessionClosed(const DSoftbusSessionClosed &event);
+    void OnStatusChanged(const StatusChangeEvent &event);
     void GetCooperateState(const CooperateStateNotice &notice);
     void OnClientDied(const ClientDiedEvent &event);
     void RemoteStartWithOptions(const DSoftbusCooperateOptions &event);

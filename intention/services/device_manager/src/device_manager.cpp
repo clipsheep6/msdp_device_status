@@ -43,6 +43,7 @@ constexpr size_t EXPECTED_N_SUBMATCHES { 2 };
 constexpr size_t EXPECTED_SUBMATCH { 1 };
 const std::string FINGER_PRINT { "hw_fingerprint_mouse" };
 const std::string WATCH { "WATCH" };
+const std::string PENCIL { "Pencil" };
 } // namespace
 
 DeviceManager::HotplugHandler::HotplugHandler(DeviceManager &devMgr)
@@ -243,6 +244,16 @@ std::shared_ptr<IDevice> DeviceManager::RemoveDevice(const std::string &devNode)
 
 void DeviceManager::OnDeviceAdded(std::shared_ptr<IDevice> dev)
 {
+    DeviceInfo(dev);
+    for (const auto &observer : observers_) {
+        std::shared_ptr<IDeviceObserver> ptr = observer.lock();
+        CHKPC(ptr);
+        ptr->OnDeviceAdded(dev);
+    }
+}
+
+void DeviceManager::DeviceInfo(std::shared_ptr<IDevice> dev)
+{
     CHKPV(dev);
     FI_HILOGI("Add device %{public}d:%{private}s", dev->GetId(), dev->GetDevPath().c_str());
     FI_HILOGI("  sysPath:       \"%{private}s\"", dev->GetSysPath().c_str());
@@ -255,12 +266,6 @@ void DeviceManager::OnDeviceAdded(std::shared_ptr<IDevice> dev)
     FI_HILOGD("  unique id:     \"%{private}s\"", dev->GetUniq().c_str());
     FI_HILOGD("  is pointer:    %{public}s, is keyboard:%{public}s",
         dev->IsPointerDevice() ? "True" : "False", dev->IsKeyboard() ? "True" : "False");
-
-    for (const auto &observer : observers_) {
-        std::shared_ptr<IDeviceObserver> ptr = observer.lock();
-        CHKPC(ptr);
-        ptr->OnDeviceAdded(dev);
-    }
 }
 
 void DeviceManager::OnDeviceRemoved(std::shared_ptr<IDevice> dev)
@@ -409,6 +414,7 @@ bool DeviceManager::AnyOf(std::function<bool(std::shared_ptr<IDevice>)> pred)
 bool DeviceManager::HasLocalPointerDevice()
 {
     return AnyOf([this](std::shared_ptr<IDevice> dev) {
+        DeviceInfo(dev);
         if ((dev == nullptr) || IsSpecialPointerDevice(dev)) {
             return false;
         }
@@ -422,7 +428,8 @@ bool DeviceManager::IsSpecialPointerDevice(std::shared_ptr<IDevice> dev)
         return false;
     }
     std::string deviceName = dev->GetName();
-    return (deviceName == FINGER_PRINT || deviceName.find(WATCH) != std::string::npos);
+    return (deviceName == FINGER_PRINT || deviceName.find(WATCH) != std::string::npos
+        || deviceName.find(PENCIL) != std::string::npos);
 }
 
 bool DeviceManager::HasLocalKeyboardDevice()

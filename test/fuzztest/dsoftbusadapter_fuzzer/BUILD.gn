@@ -24,6 +24,7 @@ deps_ex = [
   "cJSON:cjson",
   "c_utils:utils",
   "device_manager:devicemanagersdk",
+  "dsoftbus:softbus_client",
   "graphic_2d:libcomposer",
   "graphic_2d:window_animation",
   "graphic_2d:librender_service_client",

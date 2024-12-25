@@ -57,6 +57,7 @@ class DSoftbusAdapterImpl final : public IDSoftbusAdapter {
     struct Session {
         Session(int32_t socket) : socket_(socket) {}
         Session(const Session &other) : socket_(other.socket_) {}
+        ~Session();
         DISALLOW_MOVE(Session);
 
         Session& operator=(const Session &other) = delete;

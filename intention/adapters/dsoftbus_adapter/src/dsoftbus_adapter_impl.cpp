@@ -76,6 +76,11 @@ DSoftbusAdapterImpl::~DSoftbusAdapterImpl()
     Disable();
 }
 
+DSoftbusAdapterImpl::Session::~Session()
+{
+    ::Shutdown(socket_);
+}
+
 int32_t DSoftbusAdapterImpl::Enable()
 {
     CALL_DEBUG_ENTER;

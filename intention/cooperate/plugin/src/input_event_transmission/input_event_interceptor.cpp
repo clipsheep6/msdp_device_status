@@ -25,6 +25,7 @@
 
 #include "res_sched_client.h"
 #include "res_type.h"
+#include "input_event_interceptor.h"
 
 #undef LOG_TAG
 #define LOG_TAG "InputEventInterceptor"
@@ -84,6 +85,8 @@ void InputEventInterceptor::Enable(Context &context)
         [this](std::shared_ptr<MMI::KeyEvent> keyEvent) { this->OnKeyEvent(keyEvent); });
     if (interceptorId_ < 0) {
         FI_HILOGE("Input::AddInterceptor fail");
+        ReportAddInterceptor(BizCooperateStage::STAGE_SERVER_EVENTMANAGER, 
+          CooperateRadarErrCode::FAILED_INPUTEVENTINTERCEPTOR_ADD, "Enable", "");
     }
     TurnOffChannelScan();
     HeartBeatSend();
@@ -132,6 +135,18 @@ void InputEventInterceptor::Update(Context &context)
     FI_HILOGI("Update peer to \'%{public}s\'", Utility::Anonymize(remoteNetworkId_).c_str());
 }
 
+void InputEventInterceptor::ReportAddInterceptor(BizCooperateStage stageRes, CooperateRadarErrCode errCode,
+  const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_ADD_INPUTEVENTINTERCEPOR);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    Cooperate::Cooperate::ReportCooperate(coopertateRadarInfo);
+}
 void InputEventInterceptor::OnPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     CHKPV(pointerEvent);

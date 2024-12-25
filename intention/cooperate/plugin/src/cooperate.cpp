@@ -180,7 +180,13 @@ int32_t Cooperate::Start(int32_t pid, int32_t userData, const std::string &remot
     auto ret = context_.Sender().Send(CooperateEvent(CooperateEventType::START, event));
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
+        ReportStartCooperate(StageRes::RES_FAIL, CooperateRadarErrCode::COOPERATE_FAILED, "StartCooperate",
+          remoteNetworkId);
+    }else{
+        ReportStartCooperate(StageRes::RES_SUCCESS, CooperateRadarErrCode::COOPERATE_SUCCESS, "StartCooperate",
+          remoteNetworkId);
     }
+
     return errCode.get();
 }
 
@@ -292,6 +298,37 @@ void Cooperate::Dump(int32_t fd)
     if (ret != Channel<CooperateEvent>::NO_ERROR) {
         FI_HILOGE("Failed to send event via channel, error:%{public}d", ret);
     }
+}
+
+void Cooperate::ReportStartCooperate(BizCooperateStage stageRes, CooperateRadarErrCode errCode,
+  const std::string &funcName, const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_START_COOPERATE);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    ReportCooperate(coopertateRadarInfo);
+}
+
+void Cooperate::ReportCooperate(CooperateRadarInfo cooperateRadarInfo)
+{
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::MSDP,
+        DRAG_BEHAVIOR,
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "ORG_PKG", ORG_PKG_NAME,
+        "FUNC", cooperateRadarInfo.funcName,
+        "BIZ_SCENE", 1,
+        "BIZ_STATE", cooperateRadarInfo.bizState,
+        "BIZ_STAGE", cooperateRadarInfo.bizStage,
+        "STAGE_RES", cooperateRadarInfo.stageRes,
+        "ERROR_CODE", cooperateRadarInfo.errCode,
+        "HOST_PKG", cooperateRadarInfo.hostName,
+        "LOCAL_NET_ID", cooperateRadarInfo.localNetId,
+        "PEER_NET_ID", cooperateRadarInfo.peerNetId);
 }
 
 void Cooperate::Loop()

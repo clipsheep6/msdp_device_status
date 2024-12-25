@@ -39,6 +39,9 @@ public:
     void OnEvent(Context &context, const CooperateEvent &event);
     bool IsCooperateEnable();
 
+     void ReportCheckSameAccount(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+        const std::string &packageName);   
+
 private:
     class AppStateObserver final : public AppExecFwk::ApplicationStateObserverStub {
     public:

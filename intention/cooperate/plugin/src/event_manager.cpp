@@ -107,6 +107,14 @@ void EventManager::StartCooperateFinish(const DSoftbusStartCooperateFinished &ev
     };
     calls_[EventType::START] = nullptr;
     NotifyCooperateMessage(notice);
+    if(check_)
+    {
+        ReportNotify(BizCooperateStage::STAGE_NOTIFY, CooperateRadarErrCode::FAILED_NOTIFY_SUCCESS,
+           "StartCooperateFinish", "");
+    }else{
+        ReportNotify(BizCooperateStage::STAGE_NOTIFY, CooperateRadarErrCode::FAILED_NOTIFY,
+           "StartCooperateFinish", "");
+    }
 }
 
 void EventManager::RemoteStart(const DSoftbusStartCooperate &event)
@@ -227,11 +235,25 @@ void EventManager::OnClientDied(const ClientDiedEvent &event)
     }
 }
 
+void EventManager::ReportNotify(BizCooperateStage stageRes, CooperateRadarErrCode errCode, const std::string &funcName,
+     const std::string &packageName)
+{
+    CooperateRadarInfo coopertateRadarInfo;
+    coopertateRadarInfo.funcName = funcName;
+    coopertateRadarInfo.bizState = static_cast<int32_t>(BizState::STATE_BEGIN);
+    coopertateRadarInfo.bizStage = static_cast<int32_t>(BizCooperateStage::STAGE_SEND_MANAGER);
+    coopertateRadarInfo.stageRes = static_cast<int32_t>(stageRes);
+    coopertateRadarInfo.errCode = static_cast<int32_t>(errCode);
+    coopertateRadarInfo.hostName = packageName;
+    Cooperate::Cooperate::ReportCooperate(coopertateRadarInfo);
+}
+
 void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
 {
     auto session = env_->GetSocketSessionManager().FindSessionByPid(notice.pid);
     if (session == nullptr) {
         FI_HILOGD("session is null");
+        check_ = false;
         return;
     }
     CHKPV(session);
@@ -239,10 +261,14 @@ void EventManager::NotifyCooperateMessage(const CooperateNotice &notice)
     pkt << notice.userData << notice.networkId << static_cast<int32_t>(notice.msg) << notice.errCode;
     if (pkt.ChkRWError()) {
         FI_HILOGE("Packet write data failed");
+        check_ = false;
         return;
     }
     if (!session->SendMsg(pkt)) {
         FI_HILOGE("Sending failed");
+        check_ = false;
+    }else{
+        check_ = true;
     }
 }
 
